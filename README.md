@@ -1,5 +1,12 @@
 <a id="readme-top"></a>
 
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![Unlicense License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
+
 <div>
   <h1>☁️ Cloud Fun Facts Generator</h1>
     <img src="assets/Cloud Fun Facts Webpage.png" alt="Webpage Output" width="800">
@@ -17,6 +24,7 @@
     <li><a href="#built-with">Built With</a></li>
     <li><a href="#use-cases">Use Cases</a></li>
     <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#file-structure">File Structure</a></li>
     <li><a href="#getting-started">Getting Started</a></li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
@@ -79,6 +87,24 @@
 </p>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
 
+<h2 id="file-structure">File Structure</h2>
+<pre>
+    .
+  ├── assets/                  # Documentation images and UI design icons
+  ├── frontend/                # Static website files
+  │   └── index.html           # Main user interface hosted on S3
+  ├── lambda/                  # Serverless backend logic
+  │   ├── lambda_function.py   # Python source code for Fact Generation & AI
+  │   └── lambda_function.zip  # Deployment artifact generated for AWS
+  ├── main.tf                  # Core Terraform logic (Lambda, DynamoDB, API Gateway)
+  ├── outputs.tf               # CloudFront and API Gateway URLs for the user
+  ├── terraform.tf             # Terraform Cloud backend configuration
+  ├── variable.tf              # Configurable project inputs (AWS Region, Tags)
+  ├── .terraform.lock.hcl      # Provider version locking
+  └── README.md                # Project documentation
+</pre>
+<div align="right"><a href="#readme-top">↑ Back to Top</a></div>
+
 <h2 id="getting-started">Getting Started</h2>
 <h3>Prerequisites</h3>
 <ul>
@@ -134,3 +160,16 @@
 <p>Tan Si Kai - <a href="https://linkedin.com/in/si-kai-tan">LinkedIn</a></p>
 <p>Project Link: <a href="https://github.com/ShenLoong99/my-terraform-aws-projects-2025/tree/main/AWS-Cloud-Fun-Facts-Generator">Cloud Fun Facts</a></p>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
+
+[contributors-shield]: https://img.shields.io/github/contributors/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
+[contributors-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
+[forks-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/network/members
+[stars-shield]: https://img.shields.io/github/stars/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
+[stars-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/stargazers
+[issues-shield]: https://img.shields.io/github/issues/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
+[issues-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/issues
+[license-shield]: https://img.shields.io/github/license/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
+[license-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/blob/master/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/https://linkedin.com/in/si-kai-tan
