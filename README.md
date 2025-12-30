@@ -8,6 +8,11 @@
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 <div>
+  <p>
+    <strong>Notice:</strong> This project has been migrated from a monolithic collection at <a href="https://github.com/ShenLoong99/my-terraform-aws-projects-2025">my-terraform-aws-projects-2025</a> to this dedicated repository for better project isolation and CI/CD management.<br>
+    To review the full development lifecycle, including initial architectural decisions and incremental code changes, please refer to the original commit history in the source repository.
+  </p>
+
   <h1>☁️ Cloud Fun Facts Generator</h1>
     <img src="assets/Cloud Fun Facts Webpage.png" alt="Webpage Output" width="800">
   <p>
