@@ -33,6 +33,7 @@
     <li><a href="#getting-started">Getting Started</a></li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#challenges-faced">Challenges</a></li>
     <li><a href="#cost-optimization">Cost Optimization</a></li>
     <li><a href="#contact">Contact</a></li>
   </ol>
@@ -93,20 +94,19 @@
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
 
 <h2 id="file-structure">File Structure</h2>
-<pre>
-    .
-  ├── assets/                  # Documentation images and UI design icons
-  ├── frontend/                # Static website files
-  │   └── index.html           # Main user interface hosted on S3
-  ├── lambda/                  # Serverless backend logic
-  │   ├── lambda_function.py   # Python source code for Fact Generation & AI
-  │   └── lambda_function.zip  # Deployment artifact generated for AWS
-  ├── main.tf                  # Core Terraform logic (Lambda, DynamoDB, API Gateway)
-  ├── outputs.tf               # CloudFront and API Gateway URLs for the user
-  ├── terraform.tf             # Terraform Cloud backend configuration
-  ├── variable.tf              # Configurable project inputs (AWS Region, Tags)
-  ├── .terraform.lock.hcl      # Provider version locking
-  └── README.md                # Project documentation
+<pre>.
+├── assets/                  # Documentation images and UI design icons
+├── frontend/                # Static website files
+│   └── index.html           # Main user interface hosted on S3
+├── lambda/                  # Serverless backend logic
+│   ├── lambda_function.py   # Python source code for Fact Generation & AI
+│   └── lambda_function.zip  # Deployment artifact generated for AWS
+├── main.tf                  # Core Terraform logic (Lambda, DynamoDB, API Gateway)
+├── outputs.tf               # CloudFront and API Gateway URLs for the user
+├── terraform.tf             # Terraform Cloud backend configuration
+├── variable.tf              # Configurable project inputs (AWS Region, Tags)
+├── .terraform.lock.hcl      # Provider version locking
+└── README.md                # Project documentation
 </pre>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
 
@@ -116,16 +116,57 @@
   <li>AWS Account with Bedrock Claude 3.5 model access enabled.</li>
   <li>Terraform CLI (v1.5.0+) installed locally.</li>
   <li>Terraform Cloud account for remote state management.</li>
+  <li><strong>Set your AWS Region:</strong> Set to whatever <code>aws_region</code> you want in <code>variables.tf</code>.</li>
 </ul>
 <p>
-  <img src="assets/Terraform Cloud.png" alt="Terraform Cloud" width="800">
+  <img src="assets/Terraform Cloud.png" alt="Terraform Cloud" width="800"/>
 </p>
+
+<h3>Terraform State Management</h3>
+<p>Select one:</p>
+<ol>
+   <li>Terraform Cloud</li>
+   <li>Terraform Local CLI</li>
+</ol>
+
+<h4>Terraform Cloud Configuration</h4>
+<p>If you choose Terraform Cloud, please follow the steps below:</p>
+<ol>
+   <li>Create a new <strong>Workspace</strong> in Terraform Cloud.</li>
+   <li>
+    Add the following <strong>Environment Variables</strong> (AWS Credentials):
+    <ul>
+      <li><code>AWS_ACCESS_KEY_ID</code></li>
+      <li><code>AWS_SECRET_ACCESS_KEY</code></li>
+   </ul>
+   </li>
+</ol>
+
+<h4>Terraform Local CLI Configuration</h4>
+<p>If you choose Terraform Local CLI, please follow the steps below:</p>
+<ol>
+   <li>
+      Comment the <code>backend</code> block in <code>terraform.tf</code>:
+      <pre># backend "remote" {
+#   hostname     = "app.terraform.io"
+#   organization = "my-terraform-aws-projects-2025"
+#   workspaces {
+#     name = "AWS-Cloud-Fun-Facts-Generator"
+#   }
+# }</pre>
+   </li>
+   <li>
+    Add the following <strong>Environment Variables</strong> (AWS Credentials):
+    <pre>git bash command:
+export AWS_ACCESS_KEY_ID=&lt;your-aws-access-key-id&gt;
+export AWS_SECRET_ACCESS_KEY=&lt;your-aws-secret-access-key&gt;</li>
+</ol>
 
 <h3>Installation</h3>
 <ol>
   <li>Clone the repo</li>
-  <li>Initialize Terraform: <code>terraform init</code></li>
-  <li>Deploy to AWS: <code>terraform apply</code></li>
+  <li><strong>Terraform Cloud</strong> → <strong>Initialize & Apply:</strong> Push your code to GitHub. Terraform Cloud will automatically detect the change, run a <code>plan</code>, and wait for your approval.</li>
+   <li><strong>Terraform CLI</strong> → <strong>Initialize & Apply:</strong> Run <code>terraform init</code> → <code>terraform plan</code> → <code>terraform apply</code>, and wait for your approval.</li>
 </ol>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
 
@@ -136,8 +177,7 @@
 </p>
 <ul>
   <li><strong>Web Interface:</strong> Access the live site at the <code>cloudfront_url</code> (e.g., <code>https://d11a5c37xehwja.cloudfront.net</code>).</li>
-  <li><strong>REST API:</strong> Test the raw backend directly at the <code>api_invoke_url</code>:
-    <br><code>curl https://g1kcof6nl1.execute-api.ap-southeast-1.amazonaws.com/funfact</code>
+  <li><strong>REST API:</strong> Test the raw backend directly at the <code>api_invoke_url</code>: (e.g., <code>curl https://g1kcof6nl1.execute-api.ap-southeast-1.amazonaws.com/funfact</code>)
   </li>
 </ul>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
@@ -149,6 +189,39 @@
   <li>[x] <strong>GenAI Version:</strong> Integration with Amazon Bedrock to make facts witty and engaging.</li>
   <li>[x] <strong>Frontend Distribution:</strong> Static site hosting via S3 with CloudFront (OAC) for global speed and security.</li>
 </ul>
+<div align="right"><a href="#readme-top">↑ Back to Top</a></div>
+
+<h2 id="challenges-faced">Challenges</h2>
+<table>
+   <thead>
+      <tr>
+         <th>Challenge</th>
+         <th>Solution</th>
+      </tr>
+   </thead>
+   <tbody>
+      <tr>
+         <td><strong>Designing a fully serverless architecture</strong></td>
+         <td>Adopted AWS Lambda and API Gateway to eliminate server management while ensuring scalability and low operational cost.</code></td>
+      </tr>
+      <tr>
+         <td><strong>Managing infrastructure complexity</strong></td>
+         <td>Used <strong>Terraform (Infrastructure as Code)</strong> to define and provision all AWS resources consistently, making the setup reproducible and version-controlled.</td>
+      </tr>
+      <tr>
+         <td><strong>IAM permission scoping issues</strong></td>
+         <td>Refined IAM roles and policies using least-privilege principles to allow Lambda access only to required services, improving security and deployment stability.</td>
+      </tr>
+      <tr>
+         <td><strong>Handling API integration and responses</strong></td>
+         <td>Standardized API Gateway request/response mapping to ensure clean JSON outputs and predictable client-side consumption.</td>
+      </tr>
+      <tr>
+         <td><strong>Deployment and iteration speed</strong></td>
+         <td>Modularized Terraform configurations and Lambda code to allow faster updates without redeploying the entire stack.</td>
+      </tr>
+   </tbody>
+</table>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
 
 <h2 id="cost-optimization">Cost Optimization (Free Tier)</h2>
