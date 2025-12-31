@@ -244,4 +244,4 @@ export AWS_SECRET_ACCESS_KEY=&lt;your-aws-secret-access-key&gt;</li>
 [license-shield]: https://img.shields.io/github/license/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
 [license-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: /https://linkedin.com/in/si-kai-tan
+[linkedin-url]: https://linkedin.com/in/si-kai-tan
