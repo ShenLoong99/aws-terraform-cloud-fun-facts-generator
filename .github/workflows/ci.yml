@@ -15,6 +15,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        # Add this step back to install the terraform command
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false # Recommended for cleaner script output
 
       - name: Terraform Format Check
         run: terraform fmt -check
