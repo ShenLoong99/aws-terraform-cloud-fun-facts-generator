@@ -39,17 +39,37 @@ jobs:
 
       # We SKIP terraform init/apply here because TFC is already doing it!
       
-      - name: Wait for Terraform Cloud & Get Outputs
+      - name: Find Resources
         id: vars
         run: |
-          # Since TFC is managing the infra, we use AWS CLI to find our resources 
-          # by tags instead of relying on Terraform state outputs in GitHub.
+          # Get all buckets and find the one with the correct Project tag
+          ALL_BUCKETS=$(aws s3api list-buckets --query "Buckets[].Name" --output text)
           
-          BUCKET_NAME=$(aws s3api list-buckets --query "Buckets[].Name" --output text | xargs -I {} aws s3api get-bucket-tagging --bucket {} --query "TagSet[?Key=='Project' && Value=='CloudFunFacts'].Value" && echo {} | tail -n 1)
-          DIST_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?contains(Comment, 'CloudFunFacts')].Id" --output text)
+          for bucket in $ALL_BUCKETS; do
+            # Get the tag value and remove any potential quotes
+            TAG_VALUE=$(aws s3api get-bucket-tagging --bucket "$bucket" --query "TagSet[?Key=='Project'].Value" --output text 2>/dev/null | tr -d '"' | xargs)
+            
+            if [ "$TAG_VALUE" == "CloudFunFacts" ]; then
+              FINAL_BUCKET="$bucket"
+              break
+            fi
+          done
+
+          # Find CloudFront ID and clean the output
+          RAW_DIST_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?contains(Comment, 'CloudFunFacts')].Id" --output text)
+          FINAL_DIST_ID=$(echo "$RAW_DIST_ID" | tr -d '"' | xargs)
           
-          echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
-          echo "DIST_ID=$DIST_ID" >> $GITHUB_ENV
+          # Safety check: prevent empty variables from being written
+          if [ -n "$FINAL_BUCKET" ]; then
+            echo "BUCKET_NAME=$FINAL_BUCKET" >> $GITHUB_ENV
+          fi
+          
+          if [ -n "$FINAL_DIST_ID" ] && [ "$FINAL_DIST_ID" != "None" ]; then
+            echo "DIST_ID=$FINAL_DIST_ID" >> $GITHUB_ENV
+          fi
+
+          echo "✅ Found Bucket: $FINAL_BUCKET"
+          echo "✅ Found Distribution: $FINAL_DIST_ID"
 
       - name: Deploy Frontend to S3
         run: aws s3 sync ./frontend/ s3://${{ env.BUCKET_NAME }} --delete
