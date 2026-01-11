@@ -234,7 +234,8 @@ resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
   })
 }
 
-// Upload index.html
+# Upload index.html
+# Commented out to allow GitHub Actions to handle the upload with the correct API URL
 # resource "aws_s3_object" "frontend_index" {
 #   bucket       = aws_s3_bucket.frontend_bucket.id
 #   key          = "index.html"
