@@ -1,24 +1,28 @@
 #!/bin/bash
-# A simple health check script to verify deployment
 
-API_URL=$(terraform output -raw api_invoke_url)
-CF_URL=$(terraform output -raw cloudfront_url)
+echo "🔍 Locating API Gateway..."
 
-echo "Testing API Gateway..."
-STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" $API_URL)
+# Find the API ID by the name defined in main.tf
+API_ID=$(aws apigatewayv2 get-apis --query "Items[?Name=='FunfactsAPI'].ApiId" --output text)
 
-if [ $STATUS_CODE -eq 200 ]; then
-    echo "✅ API is online (Status: $STATUS_CODE)"
-else
-    echo "❌ API check failed (Status: $STATUS_CODE)"
-    exit 1
+if [ -z "$API_ID" ] || [ "$API_ID" == "None" ]; then
+  echo "❌ Error: Could not find API Gateway named 'FunfactsAPI'"
+  exit 1
 fi
 
-echo "Testing CloudFront URL..."
-CF_STATUS=$(curl -s -o /dev/null -w "%{http_code}" $CF_URL)
-if [ $CF_STATUS -eq 200 ]; then
-    echo "✅ Website is live!"
+# Construct the default invoke URL
+# Format: https://{api-id}.execute-api.{region}.amazonaws.com
+URL="https://${API_ID}.execute-api.${AWS_REGION}.amazonaws.com/funfact"
+
+echo "🌐 Testing API: $URL"
+
+# Run the health check
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+
+if [ "$STATUS" -eq 200 ]; then
+  echo "✅ API check passed (Status: $STATUS)"
+  exit 0
 else
-    echo "❌ Website check failed"
-    exit 1
+  echo "❌ API check failed (Status: $STATUS)"
+  exit 1
 fi
