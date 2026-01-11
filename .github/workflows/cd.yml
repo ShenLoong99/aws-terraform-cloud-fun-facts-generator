@@ -39,17 +39,19 @@ jobs:
           role-to-assume: arn:aws:iam::871308866502:role/GitHubActionRole
           aws-region: ${{ env.AWS_REGION }}
 
-      # Triggering TFC Apply via the CLI (Uses OIDC/VCS connection)
-      - name: Terraform Init & Apply
-        run: |
-          terraform init
-          terraform apply -auto-approve
-
-      - name: Capture Dynamic Outputs
+      # We SKIP terraform init/apply here because TFC is already doing it!
+      
+      - name: Wait for Terraform Cloud & Get Outputs
         id: vars
         run: |
-          echo "BUCKET_NAME=$(terraform output -raw s3_bucket_name)" >> $GITHUB_ENV
-          echo "DIST_ID=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_ENV
+          # Since TFC is managing the infra, we use AWS CLI to find our resources 
+          # by tags instead of relying on Terraform state outputs in GitHub.
+          
+          BUCKET_NAME=$(aws s3api list-buckets --query "Buckets[].Name" --output text | xargs -I {} aws s3api get-bucket-tagging --bucket {} --query "TagSet[?Key=='Project' && Value=='CloudFunFacts'].Value" && echo {} | tail -n 1)
+          DIST_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?contains(Comment, 'CloudFunFacts')].Id" --output text)
+          
+          echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
+          echo "DIST_ID=$DIST_ID" >> $GITHUB_ENV
 
       - name: Deploy Frontend to S3
         run: aws s3 sync ./frontend/ s3://${{ env.BUCKET_NAME }} --delete
