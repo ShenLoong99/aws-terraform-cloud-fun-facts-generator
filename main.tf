@@ -1,5 +1,13 @@
 provider "aws" {
   region = var.aws_region
+
+  default_tags {
+    tags = {
+      Project     = "CloudFunFacts"
+      Environment = "Production"
+      ManagedBy   = "Terraform"
+    }
+  }
 }
 
 // Define all facts in one place
@@ -68,6 +76,11 @@ resource "aws_lambda_function" "cloud_fun_facts" {
       API_URL = aws_apigatewayv2_stage.default.invoke_url
     }
   }
+
+  tags = {
+    Component = "Backend"
+    Service   = "FunFacts-API"
+  }
 }
 
 # Add Log Retention (Crucial for cost)
@@ -126,7 +139,8 @@ resource "aws_dynamodb_table" "cloud_facts" {
   }
 
   tags = {
-    Name        = "CloudFacts"
+    Name        = "CloudFacts-Database"
+    Component   = "Data-Layer"
     Environment = "dev"
   }
 }
@@ -160,6 +174,11 @@ resource "aws_iam_role_policy_attachment" "lambda_bedrock_access" {
 resource "aws_s3_bucket" "frontend_bucket" {
   bucket        = "cloud-fun-facts-frontend-${random_id.bucket_id.hex}"
   force_destroy = true # optional: auto-delete objects on destroy
+
+  tags = {
+    Name      = "Frontend-Static-Assets"
+    Component = "Frontend"
+  }
 }
 
 resource "random_id" "bucket_id" {
@@ -285,6 +304,7 @@ resource "aws_cloudfront_distribution" "frontend_cdn" {
   }
 
   tags = {
-    Name = "CloudFunFactsFrontend"
+    Name      = "CloudFunFacts-CDN"
+    Component = "Delivery"
   }
 }
