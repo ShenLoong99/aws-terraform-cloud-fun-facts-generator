@@ -75,5 +75,5 @@ jobs:
 
       - name: Run Deployment Health Check
         run: |
-          chmod +x ./health-check.sh
-          ./health-check.sh
+          chmod +x ./scripts/health-check.sh
+          ./scripts/health-check.sh
