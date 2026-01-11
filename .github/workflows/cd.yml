@@ -22,7 +22,10 @@ jobs:
       - name: Get Region from Terraform
         id: get_region
         run: |
-          REGION=$(grep -A 5 "variable \"aws_region\"" variables.tf | grep "default" | cut -d'"' -f2)
+          # Use terraform console to safely extract the default value of the variable
+          REGION=$(echo 'var.aws_region' | terraform console)
+          # Remove any potential quotes from the output
+          REGION=$(echo $REGION | tr -d '"')
           echo "AWS_REGION=$REGION" >> $GITHUB_ENV
 
       - name: Configure AWS Credentials
