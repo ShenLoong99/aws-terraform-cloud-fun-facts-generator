@@ -67,6 +67,15 @@ jobs:
             fi
           done
 
+          # 3. Find the API ID to construct the URL
+          API_ID=$(aws apigatewayv2 get-apis --query "Items[?Name=='FunfactsAPI'].ApiId" --output text)
+          echo "API_URL=https://${API_ID}.execute-api.${{ env.AWS_REGION }}.amazonaws.com/" >> $GITHUB_ENV
+        
+      - name: Inject API URL into Frontend
+        run: |
+          # This replaces the ${api_url} placeholder with the actual URL discovered above
+          sed -i "s|\${api_url}|${{ env.API_URL }}|g" ./frontend/index.html
+
       - name: Deploy Frontend to S3
         run: aws s3 sync ./frontend/ s3://${{ env.BUCKET_NAME }} --delete
 
