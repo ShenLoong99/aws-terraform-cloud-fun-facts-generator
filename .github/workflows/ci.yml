@@ -1,0 +1,30 @@
+name: "Infrastructure CI"
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform-ci:
+    name: "Lint & Security"
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write 
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      - name: Terraform Init & Validate
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: tfsec Security Scan
+        uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
