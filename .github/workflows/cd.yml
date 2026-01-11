@@ -39,37 +39,33 @@ jobs:
 
       # We SKIP terraform init/apply here because TFC is already doing it!
       
-      - name: Find Resources
+      - name: Wait for Terraform Cloud & Get Outputs
         id: vars
         run: |
-          # Get all buckets and find the one with the correct Project tag
+          # 1. Find S3 Bucket by Tag
           ALL_BUCKETS=$(aws s3api list-buckets --query "Buckets[].Name" --output text)
-          
           for bucket in $ALL_BUCKETS; do
-            # Get the tag value and remove any potential quotes
-            TAG_VALUE=$(aws s3api get-bucket-tagging --bucket "$bucket" --query "TagSet[?Key=='Project'].Value" --output text 2>/dev/null | tr -d '"' | xargs)
-            
-            if [ "$TAG_VALUE" == "CloudFunFacts" ]; then
-              FINAL_BUCKET="$bucket"
+            TAG_VAL=$(aws s3api get-bucket-tagging --bucket "$bucket" --query "TagSet[?Key=='Project'].Value" --output text 2>/dev/null || echo "None")
+            if [ "$TAG_VAL" == "CloudFunFacts" ]; then
+              echo "BUCKET_NAME=$bucket" >> $GITHUB_ENV
+              echo "✅ Found Bucket: $bucket"
               break
             fi
           done
 
-          # Find CloudFront ID and clean the output
-          RAW_DIST_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?contains(Comment, 'CloudFunFacts')].Id" --output text)
-          FINAL_DIST_ID=$(echo "$RAW_DIST_ID" | tr -d '"' | xargs)
-          
-          # Safety check: prevent empty variables from being written
-          if [ -n "$FINAL_BUCKET" ]; then
-            echo "BUCKET_NAME=$FINAL_BUCKET" >> $GITHUB_ENV
-          fi
-          
-          if [ -n "$FINAL_DIST_ID" ] && [ "$FINAL_DIST_ID" != "None" ]; then
-            echo "DIST_ID=$FINAL_DIST_ID" >> $GITHUB_ENV
-          fi
-
-          echo "✅ Found Bucket: $FINAL_BUCKET"
-          echo "✅ Found Distribution: $FINAL_DIST_ID"
+          # 2. Find CloudFront Distribution by Tag
+          # We list ARNs and then check tags for each to find the match
+          DIST_ARNS=$(aws cloudfront list-distributions --query "DistributionList.Items[].ARN" --output text)
+          for arn in $DIST_ARNS; do
+            TAG_MATCH=$(aws cloudfront list-tags-for-resource --resource "$arn" --query "Tags.Items[?Key=='Project' && Value=='CloudFunFacts'].Value" --output text)
+            if [ "$TAG_MATCH" == "CloudFunFacts" ]; then
+              # Extract ID from ARN (the part after the last slash)
+              ID=$(echo $arn | rev | cut -d'/' -f1 | rev)
+              echo "DIST_ID=$ID" >> $GITHUB_ENV
+              echo "✅ Found Distribution: $ID"
+              break
+            fi
+          done
 
       - name: Deploy Frontend to S3
         run: aws s3 sync ./frontend/ s3://${{ env.BUCKET_NAME }} --delete
