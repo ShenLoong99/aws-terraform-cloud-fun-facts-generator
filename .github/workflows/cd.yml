@@ -1,8 +1,6 @@
 name: "Production Deployment"
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch: # Allows manual trigger after you approve TFC
 
 jobs:
   deploy:
