@@ -1,0 +1,33 @@
+name: "Update Documentation"
+on:
+  workflow_run:
+    workflows: ["Production Deployment"]
+    types: [completed]
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Inject Dynamic Data
+        run: |
+          GITHUB_USER="${{ github.repository_owner }}"
+          REPO_URL="${{ github.server_url }}/${{ github.repository }}"
+          LINKEDIN_URL=$(curl -s https://api.github.com/users/$GITHUB_USER/social_accounts | jq -r '.[] | select(.url | contains("linkedin.com")) | .url')
+
+          sed -i "s|{{REPO_NAME}}|${{ github.repository }}|g" README.template.md
+          sed -i "s|{{REPO_URL}}|$REPO_URL|g" README.template.md
+          sed -i "s|{{LINKEDIN_URL}}|$LINKEDIN_URL|g" README.template.md
+          
+          mv README.template.md README.md
+          
+      - name: Commit Changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add README.md
+          git commit -m "docs: automated readme update" || echo "No changes to commit"
+          git push

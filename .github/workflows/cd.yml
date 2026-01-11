@@ -1,0 +1,55 @@
+name: "Production Deployment"
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        # Add this step back to install the terraform command
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false # Recommended for cleaner script output
+
+      - name: Get Region from Terraform
+        id: get_region
+        run: |
+          REGION=$(grep -A 5 "variable \"aws_region\"" variables.tf | grep "default" | cut -d'"' -f2)
+          echo "AWS_REGION=$REGION" >> $GITHUB_ENV
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::871308866502:role/GitHubActionRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Triggering TFC Apply via the CLI (Uses OIDC/VCS connection)
+      - name: Terraform Init & Apply
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Capture Dynamic Outputs
+        id: vars
+        run: |
+          echo "BUCKET_NAME=$(terraform output -raw s3_bucket_name)" >> $GITHUB_ENV
+          echo "DIST_ID=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_ENV
+
+      - name: Deploy Frontend to S3
+        run: aws s3 sync ./frontend/ s3://${{ env.BUCKET_NAME }} --delete
+
+      - name: Invalidate CloudFront Cache
+        run: aws cloudfront create-invalidation --distribution-id ${{ env.DIST_ID }} --paths "/*"
+
+      - name: Run Deployment Health Check
+        run: |
+          chmod +x ./health-check.sh
+          ./health-check.sh
