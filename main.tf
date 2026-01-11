@@ -216,21 +216,21 @@ resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
 }
 
 // Upload index.html
-resource "aws_s3_object" "frontend_index" {
-  bucket       = aws_s3_bucket.frontend_bucket.id
-  key          = "index.html"
-  content_type = "text/html"
+# resource "aws_s3_object" "frontend_index" {
+#   bucket       = aws_s3_bucket.frontend_bucket.id
+#   key          = "index.html"
+#   content_type = "text/html"
 
-  # Use templatefile to inject the API URL dynamically
-  content = templatefile("${path.module}/frontend/index.html", {
-    api_url = aws_apigatewayv2_stage.default.invoke_url
-  })
+#   # Use templatefile to inject the API URL dynamically
+#   content = templatefile("${path.module}/frontend/index.html", {
+#     api_url = aws_apigatewayv2_stage.default.invoke_url
+#   })
 
-  # This forces a re-upload if the content changes
-  etag = md5(templatefile("${path.module}/frontend/index.html", {
-    api_url = aws_apigatewayv2_stage.default.invoke_url
-  }))
-}
+#   # This forces a re-upload if the content changes
+#   etag = md5(templatefile("${path.module}/frontend/index.html", {
+#     api_url = aws_apigatewayv2_stage.default.invoke_url
+#   }))
+# }
 
 // CORS Settings for API Gateway
 resource "aws_apigatewayv2_stage" "default" {
