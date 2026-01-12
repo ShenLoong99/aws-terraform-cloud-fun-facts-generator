@@ -106,18 +106,25 @@
 
 <h2 id="file-structure">File Structure</h2>
 <pre>.
+├── .github/
+│   └── workflows/           # CI/CD Pipeline Definitions
+│       ├── cd.yml           # Production Deployment (OIDC + S3 Sync)
+│       ├── ci.yml           # Terraform PR Insights & Planning
+│       └── update-readme.yml # Automated Documentation Sync
 ├── assets/                  # Documentation images and UI design icons
 ├── frontend/                # Static website files
-│   └── index.html           # Main user interface hosted on S3
+│   └── index.html           # Main user interface (Dynamically patched by CD)
 ├── lambda/                  # Serverless backend logic
 │   ├── lambda_function.py   # Python source code for Fact Generation & AI
 │   └── lambda_function.zip  # Deployment artifact generated for AWS
+├── scripts/                 # Automation & Validation Scripts
+│   ├── health-check.sh      # Post-deployment API verification
+│   └── pre-commit-check.sh  # Local validation before pushing code
 ├── main.tf                  # Core Terraform logic (Lambda, DynamoDB, API Gateway)
 ├── outputs.tf               # CloudFront and API Gateway URLs for the user
 ├── terraform.tf             # Terraform Cloud backend configuration
 ├── variable.tf              # Configurable project inputs (AWS Region, Tags)
-├── .terraform.lock.hcl      # Provider version locking
-└── README.md                # Project documentation
+└── README.md                # Project documentation (Generated from template)
 </pre>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
 
