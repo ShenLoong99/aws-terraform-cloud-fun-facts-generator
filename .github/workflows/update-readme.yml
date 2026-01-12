@@ -1,13 +1,16 @@
 name: "Update Documentation"
 on:
-  workflow_run:
-    workflows: ["Production Deployment"]
-    types: [completed]
+  push:
+    branches:
+      - main  # Trigger only when changes are merged into main
+  workflow_dispatch: # Allows you to still run it manually for testing
 
 jobs:
   update-docs:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # Added permissions to ensure the GITHUB_TOKEN can push the changes back
+    permissions:
+      contents: write 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,12 +19,15 @@ jobs:
         run: |
           GITHUB_USER="${{ github.repository_owner }}"
           REPO_URL="${{ github.server_url }}/${{ github.repository }}"
+          # Fetch LinkedIn from GitHub Profile
           LINKEDIN_URL=$(curl -s https://api.github.com/users/$GITHUB_USER/social_accounts | jq -r '.[] | select(.url | contains("linkedin.com")) | .url')
 
+          # Replace placeholders in the template
           sed -i "s|{{REPO_NAME}}|${{ github.repository }}|g" README.template.md
           sed -i "s|{{REPO_URL}}|$REPO_URL|g" README.template.md
           sed -i "s|{{LINKEDIN_URL}}|$LINKEDIN_URL|g" README.template.md
           
+          # Overwrite the main README
           mv README.template.md README.md
           
       - name: Commit Changes
@@ -29,5 +35,6 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add README.md
+          # Only commit and push if there are actual changes to prevent infinite loops
           git commit -m "docs: automated readme update" || echo "No changes to commit"
           git push
