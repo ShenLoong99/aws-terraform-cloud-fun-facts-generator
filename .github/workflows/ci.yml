@@ -28,7 +28,7 @@ jobs:
 
       - name: Terraform Init & Validate
         run: |
-          terraform init -backend=false
+          terraform init
           terraform validate
 
       - name: tfsec Security Scan
