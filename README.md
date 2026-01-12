@@ -6,6 +6,7 @@
 [![Issues][issues-shield]][issues-url]
 [![Unlicense License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
 
 <div>
   <p>
@@ -55,6 +56,7 @@
   <img src="assets/bedrock-color.svg" alt="bedrock" width="45" height="45" style="margin: 10px;">
   <img src="https://raw.githubusercontent.com/weibeld/aws-icons-svg/main/q1-2022/Resource-Icons_01312022/Res_Storage/Res_48_Light/Res_Amazon-Simple-Storage-Service_S3-Standard_48_Light.svg" alt="s3" width="45" height="45" style="margin: 10px;"/>
   <img src="https://raw.githubusercontent.com/weibeld/aws-icons-svg/main/q1-2022/Architecture-Service-Icons_01312022/Arch_Networking-Content-Delivery/48/Arch_Amazon-CloudFront_48.svg" alt="cloudfront" width="45" height="45" style="margin: 10px;"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/githubactions/githubactions-original.svg" alt="github-actions" width="45" height="45" style="margin: 10px;"/>
 </p>
 <ul>
   <li><strong>Terraform Cloud</strong> - Managed IaC and state synchronization</li>
@@ -63,6 +65,8 @@
   <li><strong>Amazon DynamoDB</strong> - On-demand NoSQL database for fact storage</li>
   <li><strong>Amazon Bedrock (Claude 3.5)</strong> - Generative AI for real-time witty fact rewriting</li>
   <li><strong>Amazon S3 & CloudFront</strong> – Secure, global static web hosting</li>
+  <li><strong>GitHub Actions</strong> – Orchestrating the "Zero-Secret" deployment pipeline</li>
+  <li><strong>OpenID Connect (OIDC)</strong> – Secure, keyless authentication between GitHub and AWS</li>
 </ul>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
 
@@ -90,6 +94,14 @@
   <br>
   <code>User Browser</code> ➔ <code>API Gateway</code> ➔ <code>Lambda</code> ➔ <code>DynamoDB (Fetch)</code> ➔ <code>Bedrock AI (Transform)</code>
 </p>
+<h3 id="devops-gitops">🚀 DevOps & GitOps Workflow</h3>
+<p> This project utilizes a <strong>Zero-Secret</strong> security model. By leveraging GitHub Actions with <strong>OIDC (OpenID Connect)</strong>, the pipeline authenticates with AWS using short-lived tokens, eliminating the need for permanent <code>AWS_ACCESS_KEY_ID</code> stored in GitHub secrets. </p>
+<ul>
+   <li><strong>Infrastructure as Code (IaC):</strong> Managed by <strong>Terraform Cloud</strong> via a VCS-driven workflow. Every Pull Request triggers a <code>speculative plan</code> with cost estimates.</li>
+   <li><strong>Continuous Deployment (CD):</strong> A manual <code>workflow_dispatch</code> pipeline in GitHub Actions handles frontend asset delivery and CloudFront cache invalidation only after infrastructure is verified.</li>
+   <li><strong>Automated Resource Discovery:</strong> The pipeline uses <strong>AWS Resource Tagging</strong> to dynamically locate the correct S3 buckets and CloudFront IDs, making the scripts 100% project-agnostic.</li>
+   <li><strong>Dynamic Injection:</strong> Since GitHub Actions handles the frontend sync, a <code>sed</code>-based injection process dynamically patches the <code>index.html</code> with the latest API Gateway endpoint during the build phase.</li>
+</ul>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
 
 <h2 id="file-structure">File Structure</h2>
@@ -179,6 +191,13 @@ export AWS_SECRET_ACCESS_KEY=&lt;your-aws-secret-access-key&gt;</li>
   <li><strong>REST API:</strong> Test the raw backend directly at the <code>api_invoke_url</code>: (e.g., <code>curl https://g1kcof6nl1.execute-api.ap-southeast-1.amazonaws.com/funfact</code>)
   </li>
 </ul>
+
+<h3 id="quality-gates">🛡️ Quality Gates & Automation</h3>
+<ul>
+   <li><strong>PR Insights:</strong> Automated Terraform Plan comments are posted directly to Pull Requests, providing visibility into infrastructure changes before merge.</li>
+   <li><strong>Deployment Health Checks:</strong> A post-deployment bash script automatically tests the <code>/funfact</code> API endpoint to ensure the system is healthy before finalizing the run.</li>
+   <li><strong>Cost Governance:</strong> Terraform Cloud provides real-time cost estimates for every infrastructure change to prevent unexpected cloud bills.</li>
+</ul>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
 
 <h2 id="roadmap">Project Roadmap</h2>
@@ -218,6 +237,22 @@ export AWS_SECRET_ACCESS_KEY=&lt;your-aws-secret-access-key&gt;</li>
       <tr>
          <td><strong>Deployment and iteration speed</strong></td>
          <td>Modularized Terraform configurations and Lambda code to allow faster updates without redeploying the entire stack.</td>
+      </tr>
+      <tr>
+         <td><strong>Securely connecting GitHub to AWS</strong></td>
+         <td>Implemented OIDC to replace long-lived IAM user keys with short-lived session tokens.</td>
+      </tr>
+      <tr>
+         <td><strong>Hardcoded API Endpoints</strong></td>
+         <td>Used a <code>sed</code> injection step in the CI/CD pipeline to dynamically update the frontend with the API URL.</td>
+      </tr>
+      <tr>
+         <td><strong>Broken "BucketNotEmpty" Errors</strong></td>
+         <td>Configured <code>force_destroy = true</code> in Terraform to allow for clean automated teardowns during testing.</td>
+      </tr>
+      <tr>
+         <td><strong>Script Failure on Untagged Resources</strong></td>
+         <td>Refactored bash discovery scripts with robust loops to safely skip untagged AWS resources.</td>
       </tr>
    </tbody>
 </table>
