@@ -5,17 +5,22 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: prod
     permissions:
       id-token: write
       contents: read
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        # Add this step back to install the terraform command
+        
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
           terraform_wrapper: false # Recommended for cleaner script output
+
+      - name: Terraform Init
+        run: terraform init
 
       - name: Get Region from Terraform
         id: get_region
