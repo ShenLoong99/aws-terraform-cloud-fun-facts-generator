@@ -20,16 +20,8 @@ jobs:
       - name: Get Region from Terraform
         id: get_region
         run: |
-          # Uses awk to find the variable block and extract the default value regardless of spacing
-          REGION=$(awk '/variable "aws_region"/, /}/' variables.tf | grep "default" | cut -d'"' -f2 | tr -d '[:space:]')
-          
-          if [ -z "$REGION" ]; then
-            echo "❌ Error: Could not find default aws_region in variables.tf"
-            exit 1
-          fi
-          
-          echo "AWS_REGION=$REGION" >> $GITHUB_ENV
-          echo "Detected Region: $REGION"
+          echo "AWS_REGION=$(terraform output -raw aws_region)" >> $GITHUB_ENV
+          echo "Detected Region: $AWS_REGION"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4

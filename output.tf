@@ -14,3 +14,7 @@ output "s3_bucket_name" {
 output "cloudfront_distribution_id" {
   value = aws_cloudfront_distribution.frontend_cdn.id
 }
+
+output "aws_region" {
+  value = var.aws_region
+}
