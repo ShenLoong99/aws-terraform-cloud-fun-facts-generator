@@ -19,54 +19,20 @@ jobs:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
           terraform_wrapper: false # Recommended for cleaner script output
 
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Get Region from Terraform
-        id: get_region
+      - name: Fetch Outputs from Terraform
+        id: vars
         run: |
+          # Fetch exact values directly from Terraform Cloud outputs
+          echo "BUCKET_NAME=$(terraform output -raw s3_bucket_id)" >> $GITHUB_ENV
+          echo "DIST_ID=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_ENV
+          echo "API_URL=$(terraform output -raw api_invoke_url)" >> $GITHUB_ENV
           echo "AWS_REGION=$(terraform output -raw aws_region)" >> $GITHUB_ENV
-          echo "Detected Region: $AWS_REGION"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::871308866502:role/GitHubActionRole
           aws-region: ${{ env.AWS_REGION }}
-
-      # We SKIP terraform init/apply here because TFC is already doing it!
-      
-      - name: Wait for Terraform Cloud & Get Outputs
-        id: vars
-        run: |
-          # 1. Find S3 Bucket by Tag
-          ALL_BUCKETS=$(aws s3api list-buckets --query "Buckets[].Name" --output text)
-          for bucket in $ALL_BUCKETS; do
-            TAG_VAL=$(aws s3api get-bucket-tagging --bucket "$bucket" --query "TagSet[?Key=='Project'].Value" --output text 2>/dev/null || echo "None")
-            if [ "$TAG_VAL" == "CloudFunFacts" ]; then
-              echo "BUCKET_NAME=$bucket" >> $GITHUB_ENV
-              echo "✅ Found Bucket: $bucket"
-              break
-            fi
-          done
-
-          # 2. Find CloudFront Distribution by Tag
-          # We list ARNs and then check tags for each to find the match
-          DIST_ARNS=$(aws cloudfront list-distributions --query "DistributionList.Items[].ARN" --output text)
-          for arn in $DIST_ARNS; do
-            TAG_MATCH=$(aws cloudfront list-tags-for-resource --resource "$arn" --query "Tags.Items[?Key=='Project' && Value=='CloudFunFacts'].Value" --output text)
-            if [ "$TAG_MATCH" == "CloudFunFacts" ]; then
-              # Extract ID from ARN (the part after the last slash)
-              ID=$(echo $arn | rev | cut -d'/' -f1 | rev)
-              echo "DIST_ID=$ID" >> $GITHUB_ENV
-              echo "✅ Found Distribution: $ID"
-              break
-            fi
-          done
-
-          # 3. Find the API ID to construct the URL
-          API_ID=$(aws apigatewayv2 get-apis --query "Items[?Name=='FunfactsAPI'].ApiId" --output text)
-          echo "API_URL=https://${API_ID}.execute-api.${{ env.AWS_REGION }}.amazonaws.com/" >> $GITHUB_ENV
         
       - name: Inject API URL into Frontend
         run: |
