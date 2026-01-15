@@ -40,7 +40,7 @@ jobs:
       - name: Inject API URL into Frontend
         run: |
           # This replaces the ${api_url} placeholder with the actual URL discovered above
-          sed -i "s|\${api_url}|${{ env.API_URL }}|g" ./frontend/index.html
+          sed -i "s|\${api_url}|${{ env.API_URL }}/|g" ./frontend/index.html
 
       - name: Deploy Frontend to S3
         run: aws s3 sync ./frontend/ s3://${{ env.BUCKET_NAME }} --delete
