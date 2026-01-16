@@ -1,52 +1,74 @@
 name: "Infrastructure CI"
+
 on:
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
     paths:
-      - '**.tf'                # Infrastructure changes
-      - 'lambda/**'           # Backend code changes
-      - 'frontend/**'         # Frontend changes
-      - 'scripts/**'          # Helper script changes
-      - '.github/workflows/ci.yml'  # Updates to the CI logic itself
-  workflow_dispatch: # Allows manual trigger after you approve TFC
+      - '**.tf'
+      - 'lambda/**'
+      - 'frontend/**'
+      - 'scripts/**'
+      - '.github/workflows/ci.yml'
+  workflow_dispatch:
 
 jobs:
-  terraform-ci:
-    name: "Infrastructure CI"
+  # STEP A: THE BRAIN (Detection)
+  changes:
     runs-on: ubuntu-latest
-    environment: prod
-    permissions:
-      id-token: write
-      contents: write
-      pull-requests: write 
+    outputs:
+      infra: ${{ steps.filter.outputs.infra }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            infra:
+              - '**.tf'
+              - 'lambda/**'
+
+  # STEP B: STATIC ANALYSIS (Format, Validate, Security)
+  # This job runs in parallel with other checks to save time
+  static-analysis:
+    needs: changes
+    if: needs.changes.outputs.infra == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-          terraform_wrapper: true # Required to capture plan output
 
       - name: Terraform Format
-        id: fmt
         run: terraform fmt -check -recursive
 
-      - name: Terraform Init
+      - name: Terraform Init & Validate
         run: |
-          terraform init
+          terraform init -backend=false
           terraform validate
 
-      - name: Terraform Validate
-        run: |
-          terraform validate
-
-      - name: tfsec Security Scan
+      - name: Security Scan (tfsec)
         uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  # STEP C: EXECUTION PLAN
+  # This only runs if static analysis passes
+  terraform-plan:
+    needs: [changes, static-analysis]
+    if: needs.changes.outputs.infra == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+          terraform_wrapper: true
+
+      - name: Terraform Init
+        run: terraform init
 
       - name: Terraform Plan
         id: plan
@@ -59,17 +81,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const output = `#### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
-            
             <details><summary>Show Plan</summary>
-            
             \`\`\`terraform
             ${{ steps.plan.outputs.stdout }}
             \`\`\`
-            
-            </details>
-            
-            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-            
+            </details>`;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
