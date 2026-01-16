@@ -46,11 +46,18 @@ jobs:
         run: |
           terraform init -backend=false
           terraform validate
-
-      - name: Security Scan (tfsec)
-        uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
+        
+      # Run the scan and generate the SARIF report file
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-sarif-action@v0.1.4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          sarif_file: tfsec.sarif         
+
+      # Upload that file so GitHub can display it in the PR 'Security' tab
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: tfsec.sarif
 
   # STEP C: EXECUTION PLAN
   # This only runs if static analysis passes
