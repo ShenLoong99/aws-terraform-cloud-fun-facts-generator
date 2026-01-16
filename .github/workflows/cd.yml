@@ -102,22 +102,28 @@ jobs:
           chmod +x ./scripts/health-check.sh
           ./scripts/health-check.sh
         env:
-          AWS_REGION: ${{ env.AWS_REGION }}
-          SITE_URL: ${{ env.SITE_URL }}
+          API_URL: ${{ env.API_URL }}
 
       - name: Smoke Test Website
-        # We use the always() successful logic from your other project
-        # but add a small 'retry' loop directly in YAML for reliability.
         run: |
-          echo "🌐 Testing Website: ${{ env.SITE_URL }}"
-          for i in {1..5}; do
-            STATUS=$(curl -o /dev/null -s -w "%{http_code}" "https://${{ env.SITE_URL }}")
-            if [ "$STATUS" -eq 200 ]; then
-              echo "✅ Website is live at https://${{ env.SITE_URL }}"
-              exit 0
-            fi
-            echo "⏳ Status $STATUS - CloudFront might still be propagating. Retrying in 10s..."
-            sleep 10
-          done
-          echo "❌ Website failed after 5 attempts."
-          exit 1
+          chmod +x ./scripts/smoke-test-website.sh
+          ./scripts/smoke-test-website.sh
+        env:
+          SITE_URL: ${{ env.SITE_URL }}
+
+      # - name: Smoke Test Website
+      #   # We use the always() successful logic from your other project
+      #   # but add a small 'retry' loop directly in YAML for reliability.
+      #   run: |
+      #     echo "🌐 Testing Website: ${{ env.SITE_URL }}"
+      #     for i in {1..5}; do
+      #       STATUS=$(curl -o /dev/null -s -w "%{http_code}" "https://${{ env.SITE_URL }}")
+      #       if [ "$STATUS" -eq 200 ]; then
+      #         echo "✅ Website is live at https://${{ env.SITE_URL }}"
+      #         exit 0
+      #       fi
+      #       echo "⏳ Status $STATUS - CloudFront might still be propagating. Retrying in 10s..."
+      #       sleep 10
+      #     done
+      #     echo "❌ Website failed after 5 attempts."
+      #     exit 1
