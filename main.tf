@@ -1,15 +1,3 @@
-provider "aws" {
-  region = var.aws_region
-
-  default_tags {
-    tags = {
-      Project     = "CloudFunFacts"
-      Environment = "Production"
-      ManagedBy   = "Terraform"
-    }
-  }
-}
-
 // Define all facts in one place
 locals {
   cloud_facts = {
@@ -28,6 +16,8 @@ locals {
     "13" = "The word 'cloud' became popular in the 1990s as a metaphor for the internet."
     "14" = "AWS Lambda can automatically scale from zero to thousands of requests per second."
     "15" = "More data is stored in the cloud today than in all personal computers combined."
+    "16" = "Hahaha."
+    "17" = "Hehehe."
   }
 }
 
