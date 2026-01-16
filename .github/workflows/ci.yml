@@ -4,6 +4,7 @@ on:
     paths-ignore:
       - 'README.md'
       - 'README.template.md'
+      - 'cd.yml'
       - 'update-readme.yml'
       - '.gitignore'
       - 'assets/**'

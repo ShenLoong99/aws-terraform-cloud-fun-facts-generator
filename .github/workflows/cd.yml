@@ -27,6 +27,9 @@ jobs:
           token: ${{ secrets.TF_API_TOKEN }}
           organization: "my-terraform-aws-projects-2025"
           workspace: "AWS-Cloud-Fun-Facts-Generator"
+          clone_url: "https://github.com/${{ github.repository }}"
+          commit_sha: ${{ github.sha }}
+          branch: "main"
           # This step will 'hang' and stream TFC logs to GitHub
           # It only moves to the next step once TFC is 'Applied'
 
