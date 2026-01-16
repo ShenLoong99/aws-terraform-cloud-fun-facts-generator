@@ -29,6 +29,10 @@ if [ -z "$SITE_URL" ]; then
   exit 1
 fi
 
+if [[ ! $SITE_URL =~ ^http ]]; then
+  SITE_URL="https://$SITE_URL"
+fi
+
 echo "🌐 Testing Website: $SITE_URL"
 # Retry logic: wait up to 60 seconds for CloudFront to propagate
 for i in {1..6}; do
@@ -48,6 +52,8 @@ for i in {1..6}; do
     echo "❌ Website check failed (Status: $SITE_STATUS)"
     exit 1
   fi
+  echo "⏳ Waiting for CloudFront... (Attempt $i/6)"
+  sleep 10
 done
 
 echo "🎉 All health checks passed!"
