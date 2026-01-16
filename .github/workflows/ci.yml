@@ -8,6 +8,8 @@ on:
       - 'lambda/**'           # Backend code changes
       - 'frontend/**'         # Frontend changes
       - 'scripts/**'          # Helper script changes
+      - '.github/workflows/ci.yml'  # Updates to the CI logic itself
+  workflow_dispatch: # Allows manual trigger after you approve TFC
 
 jobs:
   terraform-ci:
