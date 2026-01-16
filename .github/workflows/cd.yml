@@ -22,7 +22,7 @@ jobs:
           terraform_wrapper: false # Recommended for cleaner script output
 
       - name: Wait for TFC Apply
-        uses: binxio/tfe-run-wait-action@v1
+        uses: binxio/tfe-run-wait-action@main
         with:
           token: ${{ secrets.TF_API_TOKEN }}
           organization: "my-terraform-aws-projects-2025"
