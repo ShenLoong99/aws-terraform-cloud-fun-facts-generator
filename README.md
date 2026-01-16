@@ -6,9 +6,9 @@
 [![Issues][issues-shield]][issues-url]
 [![Unlicense License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
-[![Infrastructure CI](https://github.com/{{GITHUB_USER}}/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/{{GITHUB_USER}}/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/ci.yml)
-[![Production Deployment](https://github.com/{{GITHUB_USER}}/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/cd.yml/badge.svg)](https://github.com/{{GITHUB_USER}}/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/cd.yml)
-[![Update Documentation](https://github.com/{{GITHUB_USER}}/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/update-readme.yml/badge.svg)](https://github.com/{{GITHUB_USER}}/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/update-readme.yml)
+[![Infrastructure CI][ci-shield]][ci-url]
+[![Production Deployment][cd-shield]][cd-url]
+[![Update Documentation][docs-shield]][docs-url]
 
 <div>
   <p>
@@ -289,3 +289,9 @@ export AWS_SECRET_ACCESS_KEY=&lt;your-aws-secret-access-key&gt;</li>
 [license-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: 
+[ci-shield]: https://github.com/{{GITHUB_USER}}/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/ci.yml/badge.svg
+[ci-url]: https://github.com/{{GITHUB_USER}}/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/ci.yml
+[cd-shield]: https://github.com/{{GITHUB_USER}}/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/cd.yml/badge.svg
+[cd-url]: https://github.com/{{GITHUB_USER}}/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/cd.yml
+[docs-shield]: https://github.com/{{GITHUB_USER}}/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/update-readme.yml/badge.svg
+[docs-url]: https://github.com/{{GITHUB_USER}}/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/update-readme.yml
