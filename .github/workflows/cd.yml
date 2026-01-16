@@ -3,64 +3,43 @@ on:
   push:
     branches: [ main ]
     paths:
-      - "**.tf"                     # Infrastructure changes
-      - "lambda/**"                 # Backend logic updates
-      - "frontend/**"               # UI and website file changes
-      - ".github/workflows/cd.yml"  # Updates to the deployment logic itself
-      - 'scripts/**'                # Helper script changes
-  workflow_dispatch: # Allows manual trigger after you approve TFC
+      - "**.tf"
+      - "lambda/**"
+      - "frontend/**"
+      - ".github/workflows/cd.yml"
+      - 'scripts/**'
+  workflow_dispatch:
 
 jobs:
-  wait-and-deploy:
+  # STEP A: Detect what changed
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      infra: ${{ steps.filter.outputs.infra }}
+      app: ${{ steps.filter.outputs.app }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            infra:
+              - '**.tf'
+              - 'lambda/**'
+            app:
+              - 'frontend/**'
+              - 'scripts/**'
+              - '.github/workflows/cd.yml'
+
+  # STEP B: Infrastructure Job
+  terraform:
+    needs: changes
+    # Only run if Step A detected .tf or lambda changes
+    if: needs.changes.outputs.infra == 'true'
     runs-on: ubuntu-latest
     environment: prod
-    permissions:
-      id-token: write
-      contents: read
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2 # Required to check for file changes
-
-      - name: Check Infra State and File Changes
-        id: check_deploy
-        run: |
-          # 1. Check if Infrastructure exists in TFC state
-          # If 'state list' has any output, infra_exists is true
-          if [ -n "$(terraform state list 2>/dev/null)" ]; then
-            echo "infra_exists=true" >> $GITHUB_OUTPUT
-            echo "🏠 Infrastructure exists in TFC."
-          else
-            echo "infra_exists=false" >> $GITHUB_OUTPUT
-            echo "🆕 No infrastructure found (First-time setup)."
-          fi
-
-          # 2. Check for File Changes
-          FILES=$(git diff --name-only HEAD^ HEAD)
-          
-          if echo "$FILES" | grep -E '\.tf$|lambda/'; then
-            echo "change_infra=true" >> $GITHUB_OUTPUT
-          else
-            echo "change_infra=false" >> $GITHUB_OUTPUT
-          fi
-
-          if echo "$FILES" | grep -E 'frontend/|scripts/|.github/workflows/cd.yml'; then
-            echo "change_app=true" >> $GITHUB_OUTPUT
-          else
-            echo "change_app=false" >> $GITHUB_OUTPUT
-          fi
-        
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-          terraform_wrapper: false # Recommended for cleaner script output
-
-      # This step will 'hang' and stream TFC logs to GitHub
-      # It only moves to the next step once TFC is 'Applied'
       - name: Wait for TFC Apply
-        if: steps.check_deploy.outputs.change_infra == 'true'
         uses: binxio/tfe-run-wait-action@main
         with:
           action: wait
@@ -71,19 +50,32 @@ jobs:
           commit_sha: ${{ github.sha }}
           branch: "main"
 
-      - name: Terraform Init
-        if: |
-          steps.check_deploy.outputs.infra_exists == 'true' || 
-          steps.check_deploy.outputs.change_infra == 'true'
-        run: terraform init
+  # STEP C: Deployment & Health Check
+  deploy:
+    needs: [changes, terraform]
+    # Standard Guard: Run if (app changed) OR (infra job finished successfully)
+    if: |
+      always() && 
+      (needs.changes.outputs.app == 'true' || needs.terraform.result == 'success')
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - name: Fetch Outputs from Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Fetch Environment Variables
         id: vars
-        if: |
-          steps.check_deploy.outputs.infra_exists == 'true' || 
-          steps.check_deploy.outputs.change_infra == 'true'
         run: |
-          # Fetch exact values directly from Terraform Cloud outputs
+          terraform init
+          # These always fetch current state, so SITE_URL is never empty
           echo "BUCKET_NAME=$(terraform output -raw s3_bucket_id)" >> $GITHUB_ENV
           echo "DIST_ID=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_ENV
           echo "API_URL=$(terraform output -raw api_invoke_url)" >> $GITHUB_ENV
@@ -91,41 +83,26 @@ jobs:
           echo "SITE_URL=$(terraform output -raw cloudfront_url)" >> $GITHUB_ENV
 
       - name: Configure AWS Credentials
-        if: |
-          (steps.check_deploy.outputs.infra_exists == 'true' || steps.check_deploy.outputs.change_infra == 'true') &&
-          (steps.check_deploy.outputs.change_infra == 'true' || steps.check_deploy.outputs.change_app == 'true')
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::871308866502:role/GitHubActionRole
           aws-region: ${{ env.AWS_REGION }}
-        
-      - name: Inject API URL into Frontend
-        if: |
-          (steps.check_deploy.outputs.infra_exists == 'true' || steps.check_deploy.outputs.change_infra == 'true') &&
-          (steps.check_deploy.outputs.change_infra == 'true' || steps.check_deploy.outputs.change_app == 'true')
+
+      - name: Deploy and Invalidate
         run: |
-          # This replaces the ${api_url} placeholder with the actual URL discovered above
+          # Inject the API URL into the frontend code
           sed -i "s|\${api_url}|${{ env.API_URL }}/|g" ./frontend/index.html
+          # Sync files
+          aws s3 sync ./frontend/ s3://${{ env.BUCKET_NAME }} --delete
+          # Clear cache
+          aws cloudfront create-invalidation --distribution-id ${{ env.DIST_ID }} --paths "/*"
 
-      - name: Deploy Frontend to S3
-        if: |
-          (steps.check_deploy.outputs.infra_exists == 'true' || steps.check_deploy.outputs.change_infra == 'true') &&
-          (steps.check_deploy.outputs.change_infra == 'true' || steps.check_deploy.outputs.change_app == 'true')
-        run: aws s3 sync ./frontend/ s3://${{ env.BUCKET_NAME }} --delete
-
-      - name: Invalidate CloudFront Cache
-        if: |
-          (steps.check_deploy.outputs.infra_exists == 'true' || steps.check_deploy.outputs.change_infra == 'true') &&
-          (steps.check_deploy.outputs.change_infra == 'true' || steps.check_deploy.outputs.change_app == 'true')
-        run: aws cloudfront create-invalidation --distribution-id ${{ env.DIST_ID }} --paths "/*"
-
-      - name: Run Deployment Health Check
-        if: |
-          (steps.check_deploy.outputs.infra_exists == 'true' || steps.check_deploy.outputs.change_infra == 'true') &&
-          (steps.check_deploy.outputs.change_infra == 'true' || steps.check_deploy.outputs.change_app == 'true')
+      - name: Run Health Check
         run: |
           chmod +x ./scripts/health-check.sh
           ./scripts/health-check.sh
         env:
           AWS_REGION: ${{ env.AWS_REGION }}
+          # Force HTTPS prefix for the script
           SITE_URL: "https://${{ env.SITE_URL }}"
+          API_URL: ${{ env.API_URL }}
