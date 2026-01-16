@@ -58,6 +58,7 @@ jobs:
     needs: [changes, static-analysis]
     if: needs.changes.outputs.infra == 'true'
     runs-on: ubuntu-latest
+    environment: prod
     permissions:
       pull-requests: write
     steps:
