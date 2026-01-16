@@ -2,6 +2,11 @@ name: "Production Deployment"
 on:
   push:
     branches: [ main ]
+    paths:
+      - "**.tf"                     # Infrastructure changes
+      - "lambda/**"                 # Backend logic updates
+      - "frontend/**"               # UI and website file changes
+      - ".github/workflows/cd.yml"  # Updates to the deployment logic itself
   workflow_dispatch: # Allows manual trigger after you approve TFC
 
 jobs:
