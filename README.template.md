@@ -6,6 +6,9 @@
 [![Issues][issues-shield]][issues-url]
 [![Unlicense License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
+<br>
+
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)<br>
 [![Infrastructure CI][ci-shield]][ci-url]
 [![Production Deployment][cd-shield]][cd-url]
 [![Update Documentation][docs-shield]][docs-url]
