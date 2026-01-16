@@ -18,14 +18,15 @@ echo "🌐 Testing Website: $SITE_URL"
 for i in {1..10}; do
   # Use --connect-timeout to avoid hanging on Status 00
   SITE_RESPONSE=$(curl -s -L --connect-timeout 5 -w "%{http_code}" "$SITE_URL" -o /tmp/site_output.html)
-  SITE_STATUS=$(tail -c 3 <<< "$SITE_RESPONSE")
+  # Extract only the last 3 digits (the HTTP status)
+    SITE_STATUS="${SITE_RESPONSE: -3}"
 
   if [ "$SITE_STATUS" -eq 200 ]; then
     if grep -q "Cloud Fun Facts" /tmp/site_output.html; then
       echo "✅ Website check passed (Status: $SITE_STATUS)"
       exit 0
     else
-      echo "⚠️ Content not found. Retrying..."
+      echo "⚠️ Status 200 but expected content not found. (CloudFront may be serving old cache)"
     fi
   else
     echo "⏳ Connection failed or status $SITE_STATUS. Retrying in 15s... ($i/10)"
