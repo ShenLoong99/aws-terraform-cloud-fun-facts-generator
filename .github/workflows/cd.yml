@@ -23,15 +23,32 @@ jobs:
         with:
           fetch-depth: 2 # Required to check for file changes
 
-      - name: Check if Infra/App changes exist
-        id: check_files
+      - name: Check Infra State and File Changes
+        id: check_deploy
         run: |
-          # Check if any files matching TFC triggers changed in this commit
-          # If not, we skip the TFC wait but still sync frontend
-          if git diff --name-only HEAD^ HEAD | grep -E '\.tf$|lambda/|frontend/'; then
-            echo "run_tfc=true" >> $GITHUB_OUTPUT
+          # 1. Check if Infrastructure exists in TFC state
+          # If 'state list' has any output, infra_exists is true
+          if [ -n "$(terraform state list 2>/dev/null)" ]; then
+            echo "infra_exists=true" >> $GITHUB_OUTPUT
+            echo "🏠 Infrastructure exists in TFC."
           else
-            echo "run_tfc=false" >> $GITHUB_OUTPUT
+            echo "infra_exists=false" >> $GITHUB_OUTPUT
+            echo "🆕 No infrastructure found (First-time setup)."
+          fi
+
+          # 2. Check for File Changes
+          FILES=$(git diff --name-only HEAD^ HEAD)
+          
+          if echo "$FILES" | grep -E '\.tf$|lambda/'; then
+            echo "change_infra=true" >> $GITHUB_OUTPUT
+          else
+            echo "change_infra=false" >> $GITHUB_OUTPUT
+          fi
+
+          if echo "$FILES" | grep -E 'frontend/|scripts/|.github/workflows/cd.yml'; then
+            echo "change_app=true" >> $GITHUB_OUTPUT
+          else
+            echo "change_app=false" >> $GITHUB_OUTPUT
           fi
         
       - name: Setup Terraform
@@ -43,7 +60,7 @@ jobs:
       # This step will 'hang' and stream TFC logs to GitHub
       # It only moves to the next step once TFC is 'Applied'
       - name: Wait for TFC Apply
-        if: steps.check_files.outputs.run_tfc == 'true'
+        if: steps.check_deploy.outputs.change_infra == 'true'
         uses: binxio/tfe-run-wait-action@main
         with:
           action: wait
@@ -55,37 +72,60 @@ jobs:
           branch: "main"
 
       - name: Terraform Init
+        if: |
+          steps.check_deploy.outputs.infra_exists == 'true' || 
+          steps.check_deploy.outputs.change_infra == 'true'
         run: terraform init
 
       - name: Fetch Outputs from Terraform
         id: vars
+        if: |
+          steps.check_deploy.outputs.infra_exists == 'true' || 
+          steps.check_deploy.outputs.change_infra == 'true'
         run: |
           # Fetch exact values directly from Terraform Cloud outputs
           echo "BUCKET_NAME=$(terraform output -raw s3_bucket_id)" >> $GITHUB_ENV
           echo "DIST_ID=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_ENV
           echo "API_URL=$(terraform output -raw api_invoke_url)" >> $GITHUB_ENV
           echo "AWS_REGION=$(terraform output -raw aws_region)" >> $GITHUB_ENV
+          echo "SITE_URL=$(terraform output -raw cloudfront_url)" >> $GITHUB_ENV
 
       - name: Configure AWS Credentials
+        if: |
+          (steps.check_deploy.outputs.infra_exists == 'true' || steps.check_deploy.outputs.change_infra == 'true') &&
+          (steps.check_deploy.outputs.change_infra == 'true' || steps.check_deploy.outputs.change_app == 'true')
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::871308866502:role/GitHubActionRole
           aws-region: ${{ env.AWS_REGION }}
         
       - name: Inject API URL into Frontend
+        if: |
+          (steps.check_deploy.outputs.infra_exists == 'true' || steps.check_deploy.outputs.change_infra == 'true') &&
+          (steps.check_deploy.outputs.change_infra == 'true' || steps.check_deploy.outputs.change_app == 'true')
         run: |
           # This replaces the ${api_url} placeholder with the actual URL discovered above
           sed -i "s|\${api_url}|${{ env.API_URL }}/|g" ./frontend/index.html
 
       - name: Deploy Frontend to S3
+        if: |
+          (steps.check_deploy.outputs.infra_exists == 'true' || steps.check_deploy.outputs.change_infra == 'true') &&
+          (steps.check_deploy.outputs.change_infra == 'true' || steps.check_deploy.outputs.change_app == 'true')
         run: aws s3 sync ./frontend/ s3://${{ env.BUCKET_NAME }} --delete
 
       - name: Invalidate CloudFront Cache
+        if: |
+          (steps.check_deploy.outputs.infra_exists == 'true' || steps.check_deploy.outputs.change_infra == 'true') &&
+          (steps.check_deploy.outputs.change_infra == 'true' || steps.check_deploy.outputs.change_app == 'true')
         run: aws cloudfront create-invalidation --distribution-id ${{ env.DIST_ID }} --paths "/*"
 
       - name: Run Deployment Health Check
+        if: |
+          (steps.check_deploy.outputs.infra_exists == 'true' || steps.check_deploy.outputs.change_infra == 'true') &&
+          (steps.check_deploy.outputs.change_infra == 'true' || steps.check_deploy.outputs.change_app == 'true')
         run: |
           chmod +x ./scripts/health-check.sh
           ./scripts/health-check.sh
         env:
           AWS_REGION: ${{ env.AWS_REGION }}
+          SITE_URL: "https://${{ env.SITE_URL }}"
