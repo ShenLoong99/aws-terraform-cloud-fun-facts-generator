@@ -6,7 +6,9 @@
 [![Issues][issues-shield]][issues-url]
 [![Unlicense License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
-![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
+[![Infrastructure CI](https://github.com/{{GITHUB_USER}}/aws-terraform-cloud-fun-facts-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/{{GITHUB_USER}}/aws-terraform-cloud-fun-facts-generator/actions/workflows/ci.yml)
+[![Production Deployment](https://github.com/{{GITHUB_USER}}/aws-terraform-cloud-fun-facts-generator/actions/workflows/cd.yml/badge.svg)](https://github.com/{{GITHUB_USER}}/aws-terraform-cloud-fun-facts-generator/actions/workflows/cd.yml)
+[![Update Documentation](https://github.com/{{GITHUB_USER}}/aws-terraform-cloud-fun-facts-generator/actions/workflows/update-readme.yml/badge.svg)](https://github.com/{{GITHUB_USER}}/aws-terraform-cloud-fun-facts-generator/actions/workflows/update-readme.yml)
 
 <div>
   <p>
@@ -275,15 +277,15 @@ export AWS_SECRET_ACCESS_KEY=&lt;your-aws-secret-access-key&gt;</li>
 </ul>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
 
-[contributors-shield]: https://img.shields.io/github/contributors/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
 [contributors-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
+[forks-shield]: https://img.shields.io/github/forks/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
 [forks-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/network/members
-[stars-shield]: https://img.shields.io/github/stars/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
+[stars-shield]: https://img.shields.io/github/stars/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
 [stars-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/stargazers
-[issues-shield]: https://img.shields.io/github/issues/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
+[issues-shield]: https://img.shields.io/github/issues/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
 [issues-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/issues
-[license-shield]: https://img.shields.io/github/license/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
 [license-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/si-kai-tan
