@@ -38,6 +38,7 @@ jobs:
           sed -e "s|{{REPO_NAME}}|${{ github.event.repository.name }}|g" \
               -e "s|{{REPO_URL}}|${{ github.event.repository.html_url }}|g" \
               -e "s|{{LINKEDIN_URL}}|${{ env.LINKEDIN_URL }}|g" \
+              -e "s|{{GITHUB_USER}}|${{ github.repository_owner }}|g" \
               README.template.md > README.md
           
       - name: Commit and Push Changes
