@@ -16,6 +16,7 @@ locals {
     "13" = "The word 'cloud' became popular in the 1990s as a metaphor for the internet."
     "14" = "AWS Lambda can automatically scale from zero to thousands of requests per second."
     "15" = "More data is stored in the cloud today than in all personal computers combined."
+    "16" = "AWS offers a free tier that includes 12 months of free access to many services."
   }
 }
 
