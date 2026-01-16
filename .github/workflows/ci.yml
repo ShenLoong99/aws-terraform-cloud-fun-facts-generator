@@ -33,6 +33,9 @@ jobs:
     needs: changes
     if: needs.changes.outputs.infra == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # Required for upload-sarif@v4
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -42,10 +45,11 @@ jobs:
       - name: Terraform Format
         run: terraform fmt -check -recursive
 
-      - name: Terraform Init & Validate
-        run: |
-          terraform init -backend=false
-          terraform validate
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        run: terraform validate
         
       # Run the scan and generate the SARIF report file
       - name: Run tfsec
@@ -55,7 +59,7 @@ jobs:
 
       # Upload that file so GitHub can display it in the PR 'Security' tab
       - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: tfsec.sarif
 
@@ -89,11 +93,15 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const output = `#### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
+            
             <details><summary>Show Plan</summary>
+            
             \`\`\`terraform
             ${{ steps.plan.outputs.stdout }}
             \`\`\`
+            
             </details>`;
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
