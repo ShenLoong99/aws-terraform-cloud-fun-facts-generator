@@ -46,10 +46,11 @@ jobs:
         if: steps.check_files.outputs.run_tfc == 'true'
         uses: binxio/tfe-run-wait-action@main
         with:
+          action: wait
           token: ${{ secrets.TF_API_TOKEN }}
           organization: "my-terraform-aws-projects-2025"
           workspace: "AWS-Cloud-Fun-Facts-Generator"
-          clone_url: "https://github.com/${{ github.repository }}"
+          clone_url: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git
           commit_sha: ${{ github.sha }}
           branch: "main"
 
