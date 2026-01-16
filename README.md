@@ -290,9 +290,9 @@ export AWS_SECRET_ACCESS_KEY=&lt;your-aws-secret-access-key&gt;</li>
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/si-kai-tan
 
-[ci-shield]: https://github.com/{{GITHUB_USER}}/aws-terraform-cloud-fun-facts-generator/actions/workflows/ci.yml/badge.svg
-[ci-url]: https://github.com/{{GITHUB_USER}}/aws-terraform-cloud-fun-facts-generator/actions/workflows/ci.yml
-[cd-shield]: https://github.com/{{GITHUB_USER}}/aws-terraform-cloud-fun-facts-generator/actions/workflows/cd.yml/badge.svg
-[cd-url]: https://github.com/{{GITHUB_USER}}/aws-terraform-cloud-fun-facts-generator/actions/workflows/cd.yml
-[docs-shield]: https://github.com/{{GITHUB_USER}}/aws-terraform-cloud-fun-facts-generator/actions/workflows/update-readme.yml/badge.svg
-[docs-url]: https://github.com/{{GITHUB_USER}}/aws-terraform-cloud-fun-facts-generator/actions/workflows/update-readme.yml
+[ci-shield]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/ci.yml/badge.svg
+[ci-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/ci.yml
+[cd-shield]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/cd.yml/badge.svg
+[cd-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/cd.yml
+[docs-shield]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/update-readme.yml/badge.svg
+[docs-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/update-readme.yml
