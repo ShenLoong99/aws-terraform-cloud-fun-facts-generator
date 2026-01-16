@@ -20,6 +20,19 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Required to check for file changes
+
+      - name: Check if Infra/App changes exist
+        id: check_files
+        run: |
+          # Check if any files matching TFC triggers changed in this commit
+          # If not, we skip the TFC wait but still sync frontend
+          if git diff --name-only HEAD^ HEAD | grep -E '\.tf$|lambda/|frontend/'; then
+            echo "run_tfc=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_tfc=false" >> $GITHUB_OUTPUT
+          fi
         
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -27,7 +40,10 @@ jobs:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
           terraform_wrapper: false # Recommended for cleaner script output
 
+      # This step will 'hang' and stream TFC logs to GitHub
+      # It only moves to the next step once TFC is 'Applied'
       - name: Wait for TFC Apply
+        if: steps.check_files.outputs.run_tfc == 'true'
         uses: binxio/tfe-run-wait-action@main
         with:
           token: ${{ secrets.TF_API_TOKEN }}
@@ -36,8 +52,6 @@ jobs:
           clone_url: "https://github.com/${{ github.repository }}"
           commit_sha: ${{ github.sha }}
           branch: "main"
-          # This step will 'hang' and stream TFC logs to GitHub
-          # It only moves to the next step once TFC is 'Applied'
 
       - name: Terraform Init
         run: terraform init
