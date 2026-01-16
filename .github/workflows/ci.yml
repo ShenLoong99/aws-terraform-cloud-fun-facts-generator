@@ -1,15 +1,13 @@
 name: "Infrastructure CI"
 on:
   pull_request:
-    paths-ignore:
-      - 'README.md'
-      - 'README.template.md'
-      - 'cd.yml'
-      - 'update-readme.yml'
-      - '.gitignore'
-      - 'assets/**'
     branches:
       - main
+    paths:
+      - '**.tf'                # Infrastructure changes
+      - 'lambda/**'           # Backend code changes
+      - 'frontend/**'         # Frontend changes
+      - 'scripts/**'          # Helper script changes
 
 jobs:
   terraform-ci:
