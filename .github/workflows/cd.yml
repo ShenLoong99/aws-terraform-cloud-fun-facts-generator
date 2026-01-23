@@ -5,18 +5,18 @@ on:
     paths:
       - "**.tf"
       - "lambda/**"
-      - "frontend/**"
       - ".github/workflows/cd.yml"
       - 'scripts/**'
   workflow_dispatch:
 
 jobs:
-  # STEP A: Detect what changed
-  changes:
+  # Detect what changed
+  detect-changes:
     runs-on: ubuntu-latest
+    environment: prod
     outputs:
       infra: ${{ steps.filter.outputs.infra }}
-      app: ${{ steps.filter.outputs.app }}
+      has_state: ${{ steps.check-state.outputs.has_state }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -26,16 +26,31 @@ jobs:
             infra:
               - '**.tf'
               - 'lambda/**'
-            app:
-              - 'frontend/**'
-              - 'scripts/**'
-              - '.github/workflows/cd.yml'
 
-  # STEP B: Infrastructure Job
-  terraform:
-    needs: changes
-    # Only run if Step A detected .tf or lambda changes
-    if: needs.changes.outputs.infra == 'true'
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      # Check if there is anything actually deployed in Terraform Cloud
+      - name: Check Terraform State
+        id: check-state
+        run: |
+          terraform init
+          # If 'state list' is empty, it returns nothing
+          if [ -z "$(terraform state list)" ]; then
+            echo "has_state=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_state=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+
+  # Wait for Terraform Cloud to complete the VCS-triggered run
+  terraform-cloud-wait:
+    needs: detect-changes
+    # ONLY run this if the 'infra' filter found changes
+    if: needs.detect-changes.outputs.infra == 'true'
     runs-on: ubuntu-latest
     environment: prod
     steps:
@@ -45,18 +60,18 @@ jobs:
           action: wait
           token: ${{ secrets.TF_API_TOKEN }}
           organization: "my-terraform-aws-projects-2025"
-          workspace: "AWS-Cloud-Fun-Facts-Generator"
-          clone_url: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git
+          workspace: "AWS-Cloud-Fun-Facts-Generator" # Update this to match your TFC workspace name
+          clone_url: ${{ github.server_url }}/${{ github.repository }}.git
           commit_sha: ${{ github.sha }}
           branch: "main"
 
-  # STEP C: Deployment & Health Check
-  deploy:
-    needs: [changes, terraform]
-    # Standard Guard: Run if (app changed) OR (infra job finished successfully)
+  # Post-Deployment Verification
+  post-deploy:
+    # This runs if TFC-wait was successful OR if it was skipped
+    needs: [detect-changes, terraform-cloud-wait]
     if: |
-      always() && 
-      (needs.changes.outputs.app == 'true' || needs.terraform.result == 'success')
+      always() && !cancelled() &&
+      (needs.terraform-cloud-wait.result == 'success' || needs.terraform-cloud-wait.result == 'skipped')
     runs-on: ubuntu-latest
     environment: prod
     permissions:
