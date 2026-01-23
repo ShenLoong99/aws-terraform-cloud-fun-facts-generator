@@ -49,7 +49,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_logs" {
 
 // Lambda Function
 resource "aws_lambda_function" "cloud_fun_facts" {
-  function_name = var.lambda_function_name
+  function_name = "CloudFunFacts"
   runtime       = "python3.13"
   handler       = "lambda_function.lambda_handler"
   role          = aws_iam_role.lambda_role.arn
