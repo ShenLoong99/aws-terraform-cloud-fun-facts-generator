@@ -145,28 +145,28 @@
         async function getFact() {
             const btn = document.getElementById('generateBtn');
             const factText = document.getElementById('factText');
-            
+
             // Show loading
             btn.disabled = true;
             btn.textContent = 'Loading...';
             factText.textContent = 'Getting your fact...';
             factText.className = 'fact-text loading';
-            
+
             try {
                 // Call your API
                 const response = await fetch(API_URL);
                 const data = await response.json();
-                
+
                 // Show the fact
                 factText.textContent = data.fact;
                 factText.className = 'fact-text';
-                
+
             } catch (error) {
                 // Show error
                 factText.innerHTML = '<div class="error">Could not fetch fact. Check your API endpoint!</div>';
                 console.error('Error:', error);
             }
-            
+
             // Reset button
             btn.disabled = false;
             btn.textContent = 'Generate Another Fact';
@@ -175,7 +175,7 @@
         // Check if API is configured
         window.onload = function() {
             if (API_URL.includes('YOUR-API-ID')) {
-                document.getElementById('factText').innerHTML = 
+                document.getElementById('factText').innerHTML =
                     '<div class="error">Please update API_URL in the script with your actual API Gateway endpoint</div>';
             }
         };
