@@ -1,0 +1,21 @@
+# Use this to skip checks that incur high costs or break Free Tier eligibility
+skip-check:
+  # Cloudfront-specific skips
+  - CKV_AWS_86 # Ensure CloudFront distribution has Access Logging enabled (Avoids S3 Put/Storage costs.)
+  - CKV_AWS_68 # CloudFront Distribution should have WAF enabled (Avoids ~$25/month + request fees.)
+
+  # API-Gateway-specific skips
+  - CKV_AWS_76 # Ensure API Gateway has Access Logging enabled (Avoids CloudWatch ingestion costs)
+
+  # Database-specific skips
+  - CKV_AWS_28 # Ensure DynamoDB point in time recovery (backup) is enabled (Avoids ~$0.20 per GB / month.)
+  - CKV_AWS_119  # Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK (Avoids $1/month per key)
+
+  # lambda-specific skips
+  - CKV_AWS_117 # Ensure that AWS Lambda function is configured inside a VPC (Avoids ~$32/month (NAT Gateway))
+
+  # S3-specific skips
+  - CKV_AWS_145 # Ensure that S3 buckets are encrypted with KMS by default (Avoids $1/mo KMS fee)
+
+  # GitHub Action skips
+  - CKV2_GHA_1 # Ensure top-level permissions are not set to write-all (Intentional skip as the workflows requires the permission)

@@ -1,7 +1,7 @@
 # Create S3 Bucket for Frontend
 resource "aws_s3_bucket" "frontend_bucket" {
   bucket        = "cloud-fun-facts-frontend-${random_id.bucket_id.hex}"
-  force_destroy = true # optional: auto-delete objects on destroy
+  force_destroy = true
 
   tags = {
     Name      = "Frontend-Static-Assets"
@@ -29,36 +29,16 @@ resource "aws_s3_bucket_lifecycle_configuration" "frontend_lifecycle" {
       days = 30
     }
 
+    # Abort failed uploads after 7 days to save money
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+
     # Example 2: If you enabled versioning, delete non-current versions after 7 days
     noncurrent_version_expiration {
       noncurrent_days = 7
     }
   }
-}
-
-# Add the S3 Bucket Policy
-resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
-  bucket = aws_s3_bucket.frontend_bucket.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "AllowCloudFrontServicePrincipalReadOnly"
-        Effect = "Allow"
-        Principal = {
-          Service = "cloudfront.amazonaws.com"
-        }
-        Action   = "s3:GetObject"
-        Resource = "${aws_s3_bucket.frontend_bucket.arn}/*"
-        Condition = {
-          StringEquals = {
-            "AWS:SourceArn" = aws_cloudfront_distribution.frontend_cdn.arn
-          }
-        }
-      }
-    ]
-  })
 }
 
 # Upload index.html
@@ -78,3 +58,32 @@ resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
 #     api_url = aws_apigatewayv2_stage.default.invoke_url
 #   }))
 # }
+
+# Enable versioning on the S3 bucket
+resource "aws_s3_bucket_versioning" "versioning_frontend_bucket" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+# Enable server-side encryption by default
+resource "aws_s3_bucket_server_side_encryption_configuration" "sse" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+# Block all public access to the bucket
+resource "aws_s3_bucket_public_access_block" "frontend_bucket_access" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}

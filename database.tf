@@ -32,6 +32,10 @@ resource "aws_dynamodb_table" "cloud_facts" {
     type = "S"
   }
 
+  server_side_encryption {
+    enabled = true
+  }
+
   tags = {
     Name        = "CloudFacts-Database"
     Component   = "Data-Layer"
