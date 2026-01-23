@@ -282,27 +282,88 @@ export AWS_SECRET_ACCESS_KEY=&lt;your-aws-secret-access-key&gt;</li>
 
 [contributors-shield]: https://img.shields.io/github/contributors/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
 [contributors-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/graphs/contributors
-
 [forks-shield]: https://img.shields.io/github/forks/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
 [forks-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/network/members
-
 [stars-shield]: https://img.shields.io/github/stars/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
 [stars-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/stargazers
-
 [issues-shield]: https://img.shields.io/github/issues/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
 [issues-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/issues
-
 [license-shield]: https://img.shields.io/github/license/ShenLoong99/aws-terraform-cloud-fun-facts-generator.svg?style=for-the-badge
 [license-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/blob/master/LICENSE.txt
-
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/in/si-kai-tan
-
+[linkedin-url]: {{LINKEDIN_URL}}
 [ci-shield]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/ci.yml/badge.svg
 [ci-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/ci.yml
-
 [cd-shield]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/cd.yml/badge.svg
 [cd-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/cd.yml
-
 [docs-shield]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/update-readme.yml/badge.svg
 [docs-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/update-readme.yml
+
+<!-- BEGIN_TF_DOCS -->
+
+## Requirements
+
+| Name                                                                     | Version  |
+| ------------------------------------------------------------------------ | -------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement_terraform) | >= 1.5.0 |
+| <a name="requirement_archive"></a> [archive](#requirement_archive)       | ~> 2.0   |
+| <a name="requirement_aws"></a> [aws](#requirement_aws)                   | ~> 5.0   |
+| <a name="requirement_random"></a> [random](#requirement_random)          | ~> 3.0   |
+
+## Providers
+
+| Name                                                         | Version |
+| ------------------------------------------------------------ | ------- |
+| <a name="provider_archive"></a> [archive](#provider_archive) | 2.7.1   |
+| <a name="provider_aws"></a> [aws](#provider_aws)             | 5.100.0 |
+| <a name="provider_random"></a> [random](#provider_random)    | 3.7.2   |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name                                                                                                                                                                                 | Type        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| [aws_apigatewayv2_api.funfacts_api](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_api)                                                    | resource    |
+| [aws_apigatewayv2_integration.lambda_integration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_integration)                              | resource    |
+| [aws_apigatewayv2_route.funfact_route](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_route)                                               | resource    |
+| [aws_apigatewayv2_stage.default](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_stage)                                                     | resource    |
+| [aws_cloudfront_distribution.frontend_cdn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution)                                      | resource    |
+| [aws_cloudfront_origin_access_control.s3_oac](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_origin_access_control)                          | resource    |
+| [aws_cloudwatch_log_group.lambda_log](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group)                                              | resource    |
+| [aws_dynamodb_table.cloud_facts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table)                                                         | resource    |
+| [aws_dynamodb_table_item.cloud_facts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table_item)                                               | resource    |
+| [aws_iam_role.lambda_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role)                                                                     | resource    |
+| [aws_iam_role_policy_attachment.lambda_basic_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment)                           | resource    |
+| [aws_iam_role_policy_attachment.lambda_bedrock_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment)                       | resource    |
+| [aws_iam_role_policy_attachment.lambda_dynamodb_read](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment)                        | resource    |
+| [aws_lambda_function.cloud_fun_facts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function)                                                   | resource    |
+| [aws_lambda_permission.api_gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission)                                                   | resource    |
+| [aws_s3_bucket.frontend_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket)                                                               | resource    |
+| [aws_s3_bucket_lifecycle_configuration.frontend_lifecycle](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_lifecycle_configuration)            | resource    |
+| [aws_s3_bucket_policy.frontend_bucket_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy)                                          | resource    |
+| [aws_s3_bucket_public_access_block.frontend_bucket_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block)                | resource    |
+| [aws_s3_bucket_server_side_encryption_configuration.sse](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource    |
+| [aws_s3_bucket_versioning.versioning_frontend_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning)                              | resource    |
+| [random_id.bucket_id](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id)                                                                             | resource    |
+| [archive_file.lambda_zip](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file)                                                                   | data source |
+
+## Inputs
+
+| Name                                                            | Description                    | Type     | Default            | Required |
+| --------------------------------------------------------------- | ------------------------------ | -------- | ------------------ | :------: |
+| <a name="input_aws_region"></a> [aws_region](#input_aws_region) | AWS region to deploy resources | `string` | `"ap-southeast-1"` |    no    |
+
+## Outputs
+
+| Name                                                                                                              | Description         |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------- |
+| <a name="output_api_invoke_url"></a> [api_invoke_url](#output_api_invoke_url)                                     | Public API endpoint |
+| <a name="output_aws_region"></a> [aws_region](#output_aws_region)                                                 | n/a                 |
+| <a name="output_cloudfront_distribution_id"></a> [cloudfront_distribution_id](#output_cloudfront_distribution_id) | n/a                 |
+| <a name="output_cloudfront_url"></a> [cloudfront_url](#output_cloudfront_url)                                     | n/a                 |
+| <a name="output_s3_bucket_id"></a> [s3_bucket_id](#output_s3_bucket_id)                                           | n/a                 |
+
+<!-- END_TF_DOCS -->
