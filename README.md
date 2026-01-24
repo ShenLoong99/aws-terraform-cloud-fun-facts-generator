@@ -125,23 +125,34 @@
 ├── assets/                   # Documentation images and UI design icons
 ├── frontend/                 # Static website files
 │   └── index.html            # Main UI (Dynamically patched with API URL by CD)
-├── lambda/                   # Serverless backend logic
-│   └── lambda_function.py    # Python source code for Fact Generation
+├── modules/                  # Child Modules (Stateless Logic)
+│   ├── api/                  # API Gateway (HTTP/REST) configurations
+│   ├── cdn/                  # CloudFront CDN with OAC
+│   ├── database/             # DynamoDB Table definitions
+│   ├── iam/                  # Least-privilege Roles & Policies
+│   ├── storage/              # S3 Buckets for static hosting
+│   └── lambda/               # Lambda Compute & Trigger setup
+│       └── lambda/           # Serverless backend logic
+│           ├── func.py       # Lambda Python source code
+│           └── func.zip      # Compiled deployment artifact
+│       ├── main.tf           # Module-specific resources
+│       ├── outputs.tf        # Values exported to the root
+│       ├── providers.tf      # Version constraints (No cloud block!)
+│       └── variables.tf      # Module inputs
 ├── scripts/                  # Automation & Validation Scripts
 │   ├── health-check.sh       # Post-deployment API verification
 │   └── smoke-test-website.sh # Frontend availability verification
-├── api_gateway.tf            # AWS API Gateway (HTTP API) configurations
-├── cloudfront.tf             # CDN configuration with OAC for S3 security
-├── database.tf               # DynamoDB table and seed data locals
-├── iam.tf                    # Least-privilege IAM Roles and Policies
-├── lambda.tf                 # Lambda function and Archive provider setup
 ├── main.tf                   # Provider & Random ID configurations
 ├── outputs.tf                # CloudFront and API Gateway URLs for the user
-├── storage.tf                # S3 Bucket and Lifecycle policy definitions
 ├── providers.tf              # Terraform Cloud backend & version constraints
 ├── variables.tf              # Configurable project inputs (AWS Region, Tags)
 ├── .pre-commit-config.yaml   # Local git-hook orchestration
 ├── .tflint.hcl               # TFLint AWS ruleset configuration
+├── .checkov.yml              # Checkov scan ignore list
+├── .terraform-docs.yml       # Config for terraform documentation during workflow
+├── terraform.tfstate         # Local state file (if not using cloud)
+├── terraform.tfstate.backup  # Previous state snapshot
+├── README.template.md        # Documentation source template
 └── README.md                 # Project documentation (Auto-injected by terraform-docs)
 </pre>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
