@@ -121,7 +121,7 @@
 │   └── workflows/            # CI/CD Pipeline Definitions
 │       ├── cd.yml            # Production Deployment (OIDC + S3 Sync)
 │       ├── ci.yml            # Terraform PR Insights (Checkov, TFLint, Plan)
-│       └── update-readme.yml # Automated Documentation Sync via terraform-docs
+│       └── documentation.yml # Automated Documentation Sync via terraform-docs
 ├── assets/                   # Documentation images and UI design icons
 ├── frontend/                 # Static website files
 │   └── index.html            # Main UI (Dynamically patched with API URL by CD)
@@ -162,45 +162,22 @@ This section is automatically updated with the latest infrastructure details.
 | <a name="requirement_aws"></a> [aws](#requirement_aws)                   | ~> 5.0   |
 | <a name="requirement_random"></a> [random](#requirement_random)          | ~> 3.0   |
 
-## Providers
-
-| Name                                                         | Version |
-| ------------------------------------------------------------ | ------- |
-| <a name="provider_archive"></a> [archive](#provider_archive) | 2.7.1   |
-| <a name="provider_aws"></a> [aws](#provider_aws)             | 5.100.0 |
-| <a name="provider_random"></a> [random](#provider_random)    | 3.7.2   |
-
 ## Modules
 
-No modules.
+| Name                                                        | Source             | Version |
+| ----------------------------------------------------------- | ------------------ | ------- |
+| <a name="module_api"></a> [api](#module_api)                | ./modules/api      | n/a     |
+| <a name="module_cdn"></a> [cdn](#module_cdn)                | ./modules/cdn      | n/a     |
+| <a name="module_database"></a> [database](#module_database) | ./modules/database | n/a     |
+| <a name="module_iam"></a> [iam](#module_iam)                | ./modules/iam      | n/a     |
+| <a name="module_lambda"></a> [lambda](#module_lambda)       | ./modules/lambda   | n/a     |
+| <a name="module_storage"></a> [storage](#module_storage)    | ./modules/storage  | n/a     |
 
 ## Resources
 
-| Name                                                                                                                                                                                 | Type        |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
-| [aws_apigatewayv2_api.funfacts_api](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_api)                                                    | resource    |
-| [aws_apigatewayv2_integration.lambda_integration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_integration)                              | resource    |
-| [aws_apigatewayv2_route.funfact_route](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_route)                                               | resource    |
-| [aws_apigatewayv2_stage.default](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_stage)                                                     | resource    |
-| [aws_cloudfront_distribution.frontend_cdn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution)                                      | resource    |
-| [aws_cloudfront_origin_access_control.s3_oac](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_origin_access_control)                          | resource    |
-| [aws_cloudwatch_log_group.lambda_log](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group)                                              | resource    |
-| [aws_dynamodb_table.cloud_facts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table)                                                         | resource    |
-| [aws_dynamodb_table_item.cloud_facts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table_item)                                               | resource    |
-| [aws_iam_role.lambda_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role)                                                                     | resource    |
-| [aws_iam_role_policy_attachment.lambda_basic_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment)                           | resource    |
-| [aws_iam_role_policy_attachment.lambda_bedrock_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment)                       | resource    |
-| [aws_iam_role_policy_attachment.lambda_dynamodb_read](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment)                        | resource    |
-| [aws_lambda_function.cloud_fun_facts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function)                                                   | resource    |
-| [aws_lambda_permission.api_gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission)                                                   | resource    |
-| [aws_s3_bucket.frontend_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket)                                                               | resource    |
-| [aws_s3_bucket_lifecycle_configuration.frontend_lifecycle](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_lifecycle_configuration)            | resource    |
-| [aws_s3_bucket_policy.frontend_bucket_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy)                                          | resource    |
-| [aws_s3_bucket_public_access_block.frontend_bucket_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block)                | resource    |
-| [aws_s3_bucket_server_side_encryption_configuration.sse](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource    |
-| [aws_s3_bucket_versioning.versioning_frontend_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning)                              | resource    |
-| [random_id.bucket_id](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id)                                                                             | resource    |
-| [archive_file.lambda_zip](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file)                                                                   | data source |
+| Name                                                                                                                                    | Type     |
+| --------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| [aws_cloudwatch_log_group.lambda_log](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 
 ## Inputs
 
@@ -210,13 +187,13 @@ No modules.
 
 ## Outputs
 
-| Name                                                                                                              | Description         |
-| ----------------------------------------------------------------------------------------------------------------- | ------------------- |
-| <a name="output_api_invoke_url"></a> [api_invoke_url](#output_api_invoke_url)                                     | Public API endpoint |
-| <a name="output_aws_region"></a> [aws_region](#output_aws_region)                                                 | n/a                 |
-| <a name="output_cloudfront_distribution_id"></a> [cloudfront_distribution_id](#output_cloudfront_distribution_id) | n/a                 |
-| <a name="output_cloudfront_url"></a> [cloudfront_url](#output_cloudfront_url)                                     | n/a                 |
-| <a name="output_s3_bucket_id"></a> [s3_bucket_id](#output_s3_bucket_id)                                           | n/a                 |
+| Name                                                                                                              | Description                       |
+| ----------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| <a name="output_api_endpoint"></a> [api_endpoint](#output_api_endpoint)                                           | Public API endpoint               |
+| <a name="output_aws_region"></a> [aws_region](#output_aws_region)                                                 | AWS region to deploy resources    |
+| <a name="output_cloudfront_distribution_id"></a> [cloudfront_distribution_id](#output_cloudfront_distribution_id) | ID of the cloudfront distribution |
+| <a name="output_cloudfront_url"></a> [cloudfront_url](#output_cloudfront_url)                                     | URL of website                    |
+| <a name="output_s3_bucket_id"></a> [s3_bucket_id](#output_s3_bucket_id)                                           | ID of the S3 bucket               |
 
 <!-- END_TF_DOCS -->
 </details>
@@ -322,7 +299,7 @@ No modules.
   <li>
     <strong>Dynamically update readme documentation</strong>
     <ul>
-      <li><strong>Tool:</strong> Terraform Cloud + GitHub Actions.</li>
+      <li><strong>Tool:</strong> <code>terraform_docs</code> + GitHub Actions.</li>
       <li><strong>Trigger:</strong> Merges to the <code>main</code> branch.</li>
       <li>
         <strong>Outcome:</strong> The pipeline verifies the infrastructure state from Terraform Cloud, retrieve outputs from Terraform Cloud and update the readme documentation file dynamically.
@@ -348,7 +325,7 @@ No modules.
     <img src="assets/Cloud Fun Facts Webpage with result.png" alt="Cloud Fun Facts Webpage with result" />
   </li>
   <li>
-    <strong>REST API:</strong> The raw backend directly at the <code>api_invoke_url</code>.
+    <strong>REST API:</strong> The raw backend directly at the <code>api_endpoint</code>.
   </li>
 </ul>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
@@ -451,5 +428,5 @@ No modules.
 [ci-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/ci.yml
 [cd-shield]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/cd.yml/badge.svg
 [cd-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/cd.yml
-[docs-shield]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/update-readme.yml/badge.svg
-[docs-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/update-readme.yml
+[docs-shield]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/documentation.yml/badge.svg
+[docs-url]: https://github.com/ShenLoong99/aws-terraform-cloud-fun-facts-generator/actions/workflows/documentation.yml
