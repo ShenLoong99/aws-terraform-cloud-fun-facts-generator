@@ -95,7 +95,7 @@ jobs:
           # These always fetch current state, so SITE_URL is never empty
           echo "BUCKET_NAME=$(terraform output -raw s3_bucket_id)" >> $GITHUB_ENV
           echo "DIST_ID=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_ENV
-          echo "API_URL=$(terraform output -raw api_invoke_url)" >> $GITHUB_ENV
+          echo "API_URL=$(terraform output -raw api_endpoint)" >> $GITHUB_ENV
           echo "AWS_REGION=$(terraform output -raw aws_region)" >> $GITHUB_ENV
           echo "SITE_URL=$(terraform output -raw cloudfront_url)" >> $GITHUB_ENV
 
