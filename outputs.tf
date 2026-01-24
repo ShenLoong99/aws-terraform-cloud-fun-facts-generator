@@ -1,20 +1,24 @@
-output "api_invoke_url" {
+output "api_endpoint" {
   description = "Public API endpoint"
-  value       = aws_apigatewayv2_api.funfacts_api.api_endpoint
+  value       = module.api.api_endpoint
 }
 
 output "cloudfront_url" {
-  value = aws_cloudfront_distribution.frontend_cdn.domain_name
+  description = "URL of website"
+  value       = module.cdn.cloudfront_url
 }
 
 output "s3_bucket_id" {
-  value = aws_s3_bucket.frontend_bucket.id
+  description = "ID of the S3 bucket"
+  value       = module.storage.s3_bucket_id
 }
 
 output "cloudfront_distribution_id" {
-  value = aws_cloudfront_distribution.frontend_cdn.id
+  description = "ID of the cloudfront distribution"
+  value       = module.cdn.cloudfront_distribution_id
 }
 
 output "aws_region" {
-  value = var.aws_region
+  description = "AWS region to deploy resources"
+  value       = var.aws_region
 }

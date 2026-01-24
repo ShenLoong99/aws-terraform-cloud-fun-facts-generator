@@ -10,7 +10,7 @@ resource "aws_lambda_function" "cloud_fun_facts" {
   function_name    = "CloudFunFacts"
   runtime          = "python3.13"
   handler          = "lambda_function.lambda_handler"
-  role             = aws_iam_role.lambda_role.arn
+  role             = var.role_arn
   architectures    = ["arm64"] # Cheaper than x86_64
   filename         = data.archive_file.lambda_zip.output_path
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
@@ -24,7 +24,7 @@ resource "aws_lambda_function" "cloud_fun_facts" {
 
   environment {
     variables = {
-      API_URL = aws_apigatewayv2_stage.default.invoke_url
+      API_URL = var.api_invoke_url
     }
   }
 
