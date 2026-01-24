@@ -121,7 +121,7 @@
 │   └── workflows/            # CI/CD Pipeline Definitions
 │       ├── cd.yml            # Production Deployment (OIDC + S3 Sync)
 │       ├── ci.yml            # Terraform PR Insights (Checkov, TFLint, Plan)
-│       └── update-readme.yml # Automated Documentation Sync via terraform-docs
+│       └── documentation.yml # Automated Documentation Sync via terraform-docs
 ├── assets/                   # Documentation images and UI design icons
 ├── frontend/                 # Static website files
 │   └── index.html            # Main UI (Dynamically patched with API URL by CD)
@@ -257,7 +257,7 @@ This section is automatically updated with the latest infrastructure details.
   <li>
     <strong>Dynamically update readme documentation</strong>
     <ul>
-      <li><strong>Tool:</strong> Terraform Cloud + GitHub Actions.</li>
+      <li><strong>Tool:</strong> <code>terraform_docs</code> + GitHub Actions.</li>
       <li><strong>Trigger:</strong> Merges to the <code>main</code> branch.</li>
       <li>
         <strong>Outcome:</strong> The pipeline verifies the infrastructure state from Terraform Cloud, retrieve outputs from Terraform Cloud and update the readme documentation file dynamically.
@@ -283,7 +283,7 @@ This section is automatically updated with the latest infrastructure details.
     <img src="assets/Cloud Fun Facts Webpage with result.png" alt="Cloud Fun Facts Webpage with result" />
   </li>
   <li>
-    <strong>REST API:</strong> The raw backend directly at the <code>api_invoke_url</code>.
+    <strong>REST API:</strong> The raw backend directly at the <code>api_endpoint</code>.
   </li>
 </ul>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
@@ -394,5 +394,5 @@ This section is automatically updated with the latest infrastructure details.
 [cd-shield]: https://github.com/{{GITHUB_USER}}/{{REPO_NAME}}/actions/workflows/cd.yml/badge.svg
 [cd-url]: https://github.com/{{GITHUB_USER}}/{{REPO_NAME}}/actions/workflows/cd.yml
 
-[docs-shield]: https://github.com/{{GITHUB_USER}}/{{REPO_NAME}}/actions/workflows/update-readme.yml/badge.svg
-[docs-url]: https://github.com/{{GITHUB_USER}}/{{REPO_NAME}}/actions/workflows/update-readme.yml
+[docs-shield]: https://github.com/{{GITHUB_USER}}/{{REPO_NAME}}/actions/workflows/documentation.yml/badge.svg
+[docs-url]: https://github.com/{{GITHUB_USER}}/{{REPO_NAME}}/actions/workflows/documentation.yml

@@ -22,9 +22,9 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_logs" {
 resource "aws_lambda_permission" "api_gateway" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.cloud_fun_facts.function_name
+  function_name = var.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.funfacts_api.execution_arn}/*/*"
+  source_arn    = "${var.execution_arn}/*/*"
 }
 
 # Update Lambda IAM Role (Least Privilege) Attach DynamoDB Read-Only Policy
@@ -41,7 +41,7 @@ resource "aws_iam_role_policy_attachment" "lambda_bedrock_access" {
 
 # Add the S3 Bucket Policy
 resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
-  bucket = aws_s3_bucket.frontend_bucket.id
+  bucket = var.s3_bucket_id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -53,10 +53,10 @@ resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
           Service = "cloudfront.amazonaws.com"
         }
         Action   = "s3:GetObject"
-        Resource = "${aws_s3_bucket.frontend_bucket.arn}/*"
+        Resource = "${var.bucket_arn}/*"
         Condition = {
           StringEquals = {
-            "AWS:SourceArn" = aws_cloudfront_distribution.frontend_cdn.arn
+            "AWS:SourceArn" = var.cdn_arn
           }
         }
       }
