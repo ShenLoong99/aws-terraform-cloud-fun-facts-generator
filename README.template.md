@@ -49,7 +49,7 @@
     <li><a href="#usage">Usage</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#challenges-faced">Challenges</a></li>
-    <li><a href="#cost-optimization">Cost Optimization</a></li>
+    <li><a href="#well-architected">Well Architected Framework</a></li>
     <li><a href="#acknowledgements">Acknowledgements</a></li>
   </ol>
 </details>
@@ -391,14 +391,59 @@ This section is automatically updated with the latest infrastructure details.
 </table>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
 
-<h2 id="cost-optimization">Cost Optimization (Free Tier)</h2>
-<p>This project is architected to run at <strong>$0/month</strong> for standard testing volumes:</p>
-<ul>
-  <li><strong>Lambda:</strong> Using <strong>ARM64</strong> architecture for better price-performance.</li>
-  <li><strong>Storage:</strong> S3 lifecycle rules to automatically clean up old files after 30 days.</li>
-  <li><strong>Logging:</strong> 7-day retention on CloudWatch logs to prevent storage costs.</li>
-  <li><strong>Throttling:</strong> API limits (100 req/s) to prevent unexpected usage spikes.</li>
-</ul>
+<h2 id="well-architected">AWS Well-Architected Framework Alignment</h2>
+<p>This project is designed with the six pillars of the AWS Well-Architected Framework in mind to ensure a secure, high-performing, resilient, and efficient infrastructure.</p>
+<ol>
+  <li>
+    <strong>Operational Excellence</strong>
+    <ul>
+      <li><strong>Infrastructure as Code (IaC):</strong> The entire environment is managed via Terraform, enabling version control, repeatability, and automated provisioning.</li>
+      <li><strong>Managed Services:</strong> By utilizing serverless services like AWS Lambda and Amazon Bedrock, operational overhead is minimized as AWS handles the underlying infrastructure.</li>
+      <li><strong>Deployment Automation:</strong> The inclusion of a CI/CD pipeline ensures consistent deployments and reduces the risk of human error during manual updates.</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Security</strong>
+    <ul>
+      <li><strong>Principle of Least Privilege:</strong> The <code>iam</code> module defines granular roles and policies, ensuring that each component (Lambda, API Gateway) only has the minimum permissions necessary to function.</li>
+      <li><strong>Data Protection:</strong> CloudFront is used as a secure entry point, and S3 buckets are protected with Origin Access Control (OAC) to prevent direct public access to data at rest</li>
+      <li><strong>Secure Communication:</strong> All external traffic is routed through API Gateway and CloudFront, supporting HTTPS for encryption in transit.</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Reliability</strong>
+    <ul>
+      <li><strong>Serverless Resiliency:</strong> Services like S3, DynamoDB, and Lambda are inherently highly available and distributed across multiple Availability Zones (AZs) by default.</li>
+      <li><strong>Error Handling:</strong> The serverless architecture allows for automatic retries and easy implementation of Dead Letter Queues (DLQs) to handle failed executions gracefully.</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Performance Efficiency</strong>
+    <ul>
+      <li><strong>Auto-Scaling:</strong> API Gateway and AWS Lambda automatically scale based on the number of incoming requests, ensuring the application remains responsive under varying loads.</li>
+      <li><strong>Global Content Delivery:</strong> Amazon CloudFront caches content at edge locations worldwide to reduce latency for end-users.</li>
+      <li><strong>Optimized Compute:</strong> (Optional) If configured for Graviton2 (ARM64), the Lambda functions can achieve better price-performance compared to standard x86 architectures.</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Cost Optimization (Free Tier)</strong>
+    <ul>
+      <li><strong>Lambda:</strong> Using <strong>ARM64</strong> architecture for better price-performance.</li>
+      <li><strong>Storage:</strong> S3 lifecycle rules to automatically clean up old files after 30 days.</li>
+      <li><strong>Logging:</strong> 7-day retention on CloudWatch logs to prevent storage costs.</li>
+      <li><strong>Throttling:</strong> API limits (100 req/s) to prevent unexpected usage spikes.</li>
+      <li><strong>Pay-as-you-go Model:</strong> This project leverages serverless components where costs are only incurred during execution, eliminating idle resource expenses.</li>
+      <li><strong>Resource Tagging:</strong> The <code>main.tf</code> implements local <code>common_tags</code> (e.g., Project, Environment), which facilitates cost allocation and tracking within the AWS Billing Dashboard.</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Sustainability</strong>
+    <ul>
+      <li><strong>Maximum Utilization:</strong> By using serverless and shared-resource services, the project minimizes the environmental impact by only consuming the energy and hardware resources required for each specific request.</li>
+      <li><strong>Managed Service Adoption:</strong> Shifting the responsibility of hardware management and power efficiency to AWS reduces the overall carbon footprint of the workload.</li>
+    </ul>
+  </li>
+</ol>
 <div align="right"><a href="#readme-top">↑ Back to Top</a></div>
 
 <h2 id="acknowledgements">Acknowledgements</h2>
