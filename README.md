@@ -180,7 +180,6 @@ This section is automatically updated with the latest infrastructure details.
 | <a name="module_api"></a> [api](#module_api)                | ./modules/api      | n/a     |
 | <a name="module_cdn"></a> [cdn](#module_cdn)                | ./modules/cdn      | n/a     |
 | <a name="module_database"></a> [database](#module_database) | ./modules/database | n/a     |
-| <a name="module_iam"></a> [iam](#module_iam)                | ./modules/iam      | n/a     |
 | <a name="module_lambda"></a> [lambda](#module_lambda)       | ./modules/lambda   | n/a     |
 | <a name="module_storage"></a> [storage](#module_storage)    | ./modules/storage  | n/a     |
 
