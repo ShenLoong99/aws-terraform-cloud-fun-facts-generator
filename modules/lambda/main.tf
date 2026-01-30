@@ -28,6 +28,10 @@ resource "aws_lambda_function" "cloud_fun_facts" {
     }
   }
 
+  dead_letter_config {
+    target_arn = aws_sqs_queue.lambda_dlq.arn
+  }
+
   tags = {
     Component = "Backend"
     Service   = "FunFacts-API"
@@ -58,4 +62,24 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_logs" {
 resource "aws_iam_role_policy_attachment" "lambda_bedrock_access" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonBedrockFullAccess"
+}
+
+# Create the SQS Queue to act as the DLQ
+resource "aws_sqs_queue" "lambda_dlq" {
+  name                    = "csv-pipeline-lambda-dlq"
+  sqs_managed_sse_enabled = true
+}
+
+# Grant Lambda permission to send to SQS
+resource "aws_iam_role_policy" "lambda_sqs_dlq" {
+  name = "lambda_sqs_dlq_policy"
+  role = aws_iam_role.lambda_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action   = "sqs:SendMessage"
+      Effect   = "Allow"
+      Resource = aws_sqs_queue.lambda_dlq.arn
+    }]
+  })
 }
