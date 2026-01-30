@@ -55,3 +55,9 @@ resource "aws_dynamodb_table_item" "cloud_facts" {
     FactText = { S = each.value }
   })
 }
+
+# Update Lambda IAM Role (Least Privilege) Attach DynamoDB Read-Only Policy
+resource "aws_iam_role_policy_attachment" "lambda_dynamodb_read" {
+  role       = var.lambda_role_name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess"
+}

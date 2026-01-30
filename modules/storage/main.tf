@@ -41,24 +41,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "frontend_lifecycle" {
   }
 }
 
-# Upload index.html
-# Commented out to allow GitHub Actions to handle the upload with the correct API URL
-# resource "aws_s3_object" "frontend_index" {
-#   bucket       = aws_s3_bucket.frontend_bucket.id
-#   key          = "index.html"
-#   content_type = "text/html"
-
-#   # Use templatefile to inject the API URL dynamically
-#   content = templatefile("${path.module}/frontend/index.html", {
-#     api_url = aws_apigatewayv2_stage.default.invoke_url
-#   })
-
-#   # This forces a re-upload if the content changes
-#   etag = md5(templatefile("${path.module}/frontend/index.html", {
-#     api_url = aws_apigatewayv2_stage.default.invoke_url
-#   }))
-# }
-
 # Enable versioning on the S3 bucket
 resource "aws_s3_bucket_versioning" "versioning_frontend_bucket" {
   bucket = aws_s3_bucket.frontend_bucket.id
@@ -87,3 +69,46 @@ resource "aws_s3_bucket_public_access_block" "frontend_bucket_access" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+# Add the S3 Bucket Policy
+resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowCloudFrontServicePrincipalReadOnly"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "${aws_s3_bucket.frontend_bucket.arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = var.cdn_arn
+          }
+        }
+      }
+    ]
+  })
+}
+
+# Upload index.html
+# Commented out to allow GitHub Actions to handle the upload with the correct API URL
+# resource "aws_s3_object" "frontend_index" {
+#   bucket       = aws_s3_bucket.frontend_bucket.id
+#   key          = "index.html"
+#   content_type = "text/html"
+
+#   # Use templatefile to inject the API URL dynamically
+#   content = templatefile("${path.module}/frontend/index.html", {
+#     api_url = aws_apigatewayv2_stage.default.invoke_url
+#   })
+
+#   # This forces a re-upload if the content changes
+#   etag = md5(templatefile("${path.module}/frontend/index.html", {
+#     api_url = aws_apigatewayv2_stage.default.invoke_url
+#   }))
+# }

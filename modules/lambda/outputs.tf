@@ -7,3 +7,8 @@ output "invoke_arn" {
   description = "Invoke ARN of lambda function"
   value       = aws_lambda_function.cloud_fun_facts.invoke_arn
 }
+
+output "lambda_role_name" {
+  description = "Name of lambda role name"
+  value       = aws_iam_role.lambda_role.name
+}

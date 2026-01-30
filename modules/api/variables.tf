@@ -12,3 +12,13 @@ variable "default_tags" {
   description = "Extra tags to pass to the provider"
   type        = map(string)
 }
+
+variable "function_name" {
+  description = "Function name of lambda function"
+  type        = string
+}
+
+variable "execution_arn" {
+  description = "Execution ARN of the API Gateway"
+  type        = string
+}
