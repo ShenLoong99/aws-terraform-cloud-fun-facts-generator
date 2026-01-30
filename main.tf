@@ -9,10 +9,12 @@ locals {
 
 # Module for API Gateway
 module "api" {
-  source       = "./modules/api"
-  invoke_arn   = module.lambda.invoke_arn
-  aws_region   = var.aws_region
-  default_tags = local.common_tags
+  source        = "./modules/api"
+  invoke_arn    = module.lambda.invoke_arn
+  aws_region    = var.aws_region
+  default_tags  = local.common_tags
+  function_name = module.lambda.function_name
+  execution_arn = module.api.execution_arn
 }
 
 # Module for Cloudfront
@@ -25,27 +27,15 @@ module "cdn" {
 
 # Module for DynamoDB
 module "database" {
-  source       = "./modules/database"
-  aws_region   = var.aws_region
-  default_tags = local.common_tags
-}
-
-# Module for IAM (Permissions, roles, policies)
-module "iam" {
-  source        = "./modules/iam"
-  function_name = module.lambda.function_name
-  execution_arn = module.api.execution_arn
-  s3_bucket_id  = module.storage.s3_bucket_id
-  bucket_arn    = module.storage.bucket_arn
-  cdn_arn       = module.cdn.cdn_arn
-  aws_region    = var.aws_region
-  default_tags  = local.common_tags
+  source           = "./modules/database"
+  aws_region       = var.aws_region
+  default_tags     = local.common_tags
+  lambda_role_name = module.lambda.lambda_role_name
 }
 
 # Module for Lambda
 module "lambda" {
   source         = "./modules/lambda"
-  role_arn       = module.iam.role_arn
   api_invoke_url = module.api.api_invoke_url
   aws_region     = var.aws_region
   default_tags   = local.common_tags
@@ -56,6 +46,7 @@ module "storage" {
   source       = "./modules/storage"
   aws_region   = var.aws_region
   default_tags = local.common_tags
+  cdn_arn      = module.cdn.cdn_arn
 }
 
 # Add Log Retention (Crucial for cost)

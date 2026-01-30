@@ -1,8 +1,3 @@
-variable "role_arn" {
-  description = "ARN of the lambda role"
-  type        = string
-}
-
 variable "api_invoke_url" {
   description = "API Invoke URL"
   type        = string

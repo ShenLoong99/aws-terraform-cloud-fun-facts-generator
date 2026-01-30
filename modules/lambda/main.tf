@@ -10,7 +10,7 @@ resource "aws_lambda_function" "cloud_fun_facts" {
   function_name    = "CloudFunFacts"
   runtime          = "python3.13"
   handler          = "lambda_function.lambda_handler"
-  role             = var.role_arn
+  role             = aws_iam_role.lambda_role.arn
   architectures    = ["arm64"] # Cheaper than x86_64
   filename         = data.archive_file.lambda_zip.output_path
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
@@ -28,8 +28,58 @@ resource "aws_lambda_function" "cloud_fun_facts" {
     }
   }
 
+  dead_letter_config {
+    target_arn = aws_sqs_queue.lambda_dlq.arn
+  }
+
   tags = {
     Component = "Backend"
     Service   = "FunFacts-API"
   }
+}
+
+# IAM Role for Lambda
+resource "aws_iam_role" "lambda_role" {
+  name = "cloud-fun-facts-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+# lambda logs role
+resource "aws_iam_role_policy_attachment" "lambda_basic_logs" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# Update IAM Role (Terraform) Lambda must be allowed to call Bedrock
+resource "aws_iam_role_policy_attachment" "lambda_bedrock_access" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonBedrockFullAccess"
+}
+
+# Create the SQS Queue to act as the DLQ
+resource "aws_sqs_queue" "lambda_dlq" {
+  name                    = "csv-pipeline-lambda-dlq"
+  sqs_managed_sse_enabled = true
+}
+
+# Grant Lambda permission to send to SQS
+resource "aws_iam_role_policy" "lambda_sqs_dlq" {
+  name = "lambda_sqs_dlq_policy"
+  role = aws_iam_role.lambda_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action   = "sqs:SendMessage"
+      Effect   = "Allow"
+      Resource = aws_sqs_queue.lambda_dlq.arn
+    }]
+  })
 }
